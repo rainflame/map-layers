@@ -2,9 +2,7 @@
 
 Historical U.S. wildfires.
 
-# Building the wildfire dataset
-
-To run the scripts used to create the fire dataset ensure you have python, [GDAL](https://gdal.org/), [tippecanoe](https://github.com/mapbox/tippecanoe), and [pmtiles](https://github.com/protomaps/PMTiles) installed.
+## Building the dataset
 
 There are three datasets that are combined to create the final fire perimeters layer.
 
@@ -40,12 +38,33 @@ Install the dependencies and run the python script to combine the datasets into 
 
 ```
 pip install -r requirements.txt
+```
+
+Then,
+
+```
 python create_combined_fire_dataset.py
 ```
 
-This should create `data/fires.shp`.
+This will likely take over an hour to run. When complete, you should now have a combined, cleaned and deduplicated version of the dataset at `data/fires.shp`.
+
+#### Combining datasets interactively
+
+You can also run the jupyter notebook for an interactive version of the same process:
+
+```
+pip install jupyter seaborn
+```
+
+Then,
+
+```
+jupyter notebook create_combined_fire_dataset.ipynb
+```
 
 ### Tile the dataset
+
+To run the tiling script, ensure you have [GDAL](https://gdal.org/), [tippecanoe](https://github.com/mapbox/tippecanoe), and [pmtiles](https://github.com/protomaps/PMTiles) installed.
 
 Run the script to convert the shapefile to tiles stored in a `.pmtiles` file:
 
