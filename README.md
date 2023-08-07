@@ -31,7 +31,7 @@ Upload a `.pmtiles` file:
 rclone copy wildfires/data/fires.pmtiles pikar2:mapserve --progress
 ```
 
-To set up the Cloudflare worker to serve the `.pmtiles` data from the `mapserve` bucket, follow the [instructions here](https://protomaps.com/docs/cdn/cloudflare).
+See [workers](/workers/) for instructions on setting up the Cloudflare worker to serve files from the `mapserve` bucket.
 
 ### Uploading and serving other data
 
@@ -40,3 +40,5 @@ To upload other file types:
 ```
 rclone copy basemap/data/Barlow\ Regular pikar2:mapmeta --progress
 ```
+
+See [workers](/workers/) for instructions on setting up the Cloudflare worker.
