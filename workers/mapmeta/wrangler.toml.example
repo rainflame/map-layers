@@ -2,16 +2,13 @@ name = "mapmeta"
 main = "index.ts"
 compatibility_date = "2023-08-08"
 minify = true
+account_id = "<YOUR ACCOUNT ID>"
 
-r2_buckets  = [
-  { binding = "BUCKET", preview_bucket_name = "bucket-name", bucket_name = "bucket-name" }
-]
+
+[[r2_buckets]]
+binding = 'BUCKET' 
+preview_bucket_name = '<YOUR BUCKET NAME>'
+bucket_name = '<YOUR BUCKET NAME>'
 
 [vars]
 ALLOWED_ORIGINS = "http://localhost:8000"
-
-
-account_id = ""
-workers_dev = true
-route = ""
-zone_id = ""
