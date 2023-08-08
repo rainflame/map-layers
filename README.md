@@ -35,10 +35,10 @@ See [workers](/workers/) for instructions on setting up the Cloudflare worker to
 
 ### Uploading and serving other data
 
-To upload other file types:
+To upload other file types, for example the font files:
 
 ```
-rclone copy basemap/data/Barlow\ Regular pikar2:mapmeta --progress
+rclone copy basemap/data/Barlow\ Regular pikar2:mapmeta/Barlow\ Regular/ --progress
 ```
 
 See [workers](/workers/) for instructions on setting up the Cloudflare worker.

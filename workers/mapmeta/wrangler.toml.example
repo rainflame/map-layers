@@ -1,0 +1,17 @@
+name = "mapmeta"
+main = "index.ts"
+compatibility_date = "2023-08-08"
+minify = true
+
+r2_buckets  = [
+  { binding = "BUCKET", preview_bucket_name = "bucket-name", bucket_name = "bucket-name" }
+]
+
+[vars]
+ALLOWED_ORIGINS = "http://localhost:8000"
+
+
+account_id = ""
+workers_dev = true
+route = ""
+zone_id = ""
