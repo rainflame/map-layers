@@ -2,8 +2,9 @@
 
 The source code to generate the datasets available on [pikamaps.com](https://pikamaps.com). See each subdirectory for instructions on creating each individual dataset.
 
-- [Basemap](/basemap/). The general-purpose map that appears below any other layers. This directory contains the method for creating the map from openstreetmap data and the required font files.
-- [Wildfires](/wildfires/). A layer containing historic wildfires in the United States since 1900. A script is provided to merge a number of different datasets into one deduplicated and cleaned dataset.
+- [Basemap](/basemap/). The general-purpose map that appears below any other layers. This directory contains the method for creating the map from OpenStreetMap data and the required font files.
+- [Layers](/layers/). Generators for any layers that can be visualized on top of the basemap.
+  - [Wildfires](/wildfires/). A layer containing historic wildfires in the United States since 1900. A script is provided to merge a number of different datasets into one deduplicated and cleaned dataset.
 
 Pika Maps uses [protomaps](https://protomaps.com/) to serve map tiles. Each dataset can be built as a `.pmtiles` file that can be deployed to Cloudflare or AWS and [served through a serverless function](https://protomaps.com/docs/cdn).
 
@@ -25,17 +26,17 @@ For Pika Maps, we use two buckets: `mapserve` for `.pmtiles` files and `mapmeta`
 
 ### Uploading and serving pmtiles data
 
-Upload a `.pmtiles` file:
+For storing `.pmtiles` files, we use a bucket `mapserve`. Uploading looks like this:
 
 ```
-rclone copy wildfires/data/fires.pmtiles pikar2:mapserve --progress
+rclone copy layers/wildfires/data/fires.pmtiles pikar2:mapserve --progress
 ```
 
 See [workers](/workers/) for instructions on setting up the Cloudflare worker to serve files from the `mapserve` bucket.
 
 ### Uploading and serving other data
 
-To upload other file types, for example the font files:
+Other file types get uploaded to a bucket `mapmeta`. For example, uploading the font files looks like this:
 
 ```
 rclone copy basemap/data/Barlow\ Regular pikar2:mapmeta/Barlow\ Regular/ --progress
