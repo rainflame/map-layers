@@ -22,7 +22,7 @@ Then, build a `.mbtiles` file using `rio`:
 rio rgbify -b -10000 -i 0.1 --min-z 6 --max-z 12 -j 10 --format webp data/dem.vrt data/rgb.mbtiles
 ```
 
-Note that you'll want to change the number of cores in this command (`-j 10` in the example above) to an appropriate number given the computer you're running it on.
+Note that you'll want to change the number of workers in this command (`-j 10` in the example above) to an appropriate number given you machine's number of cores.
 
 I ran into [this issue](https://github.com/mapbox/rio-rgbify/issues/39) when running `rgbify`, with the only workaround being to manually edit the source code to remove the buggy line as [done here](https://github.com/acalcutt/rio-rgbify/commit/6db4f8baf4d78e157e02c67b05afae49289f9ef1). Hopefully this gets fixed in the future, but as of the time of writing this the workaround is necessary.
 
@@ -40,4 +40,14 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
+`rgbify` does not add any metadata to the `.mbtiles` file beyond the bare minimum required fields. However, we'll want the bounding box coordinates included when converting to `.pmtiles`. Run this script to pull out the bounding box and add it to the metadata:
+
+```
+python add_metadata.py
+```
+
 Finally, convert to a `.pmtiles` file:
+
+```
+pmtiles convert data/rgb.mbtiles data/elevation.pmtiles
+```
