@@ -39,7 +39,7 @@ See [workers](/workers/) for instructions on setting up the Cloudflare worker to
 Other file types get uploaded to a bucket `mapmeta`. For example, uploading the font files looks like this:
 
 ```
-rclone copy basemap/data/Barlow\ Regular pikar2:mapmeta/Barlow\ Regular/ --progress
+rclone copy basemap/glypths/data/Barlow\ Regular pikar2:mapmeta/Barlow\ Regular/ --progress
 ```
 
 See [workers](/workers/) for instructions on setting up the Cloudflare worker.
