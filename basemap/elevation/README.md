@@ -1,5 +1,7 @@
 # Elevation tiles
 
+![Raw terrain RGB tiles](./elevation.png)
+
 Create TerrainRGB tiles from USGS DEM sources.
 
 ## Download the elevation data
