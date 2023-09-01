@@ -4,19 +4,39 @@
 
 Create TerrainRGB tiles from USGS DEM sources.
 
-## Download the elevation data
+## Building the elevation dataset
 
-Use the jupyter notebook `create_elevation_data.ipynb` to download the DEM files from USGS for a particular region. There's a few bounding boxes in the notebook, but you'll probably want to add your own. This will download `.tif` for that region to `/data/sources/`.
+Install the dependencies:
+
+```
+pip install -r requirements.txt
+```
+
+### Download the elevation data
 
 We're using the [USGS seamless 1 arc-second dataset](https://www.usgs.gov/faqs/what-types-elevation-datasets-are-available-what-formats-do-they-come-and-where-can-i-download), which is medium resolution and good enough for most use cases. Each tile is about 50MB. There is a higher resolution 1/3 arc-second dataset that has tiles that are around 450MB. I haven't tried this dataset but it would likely require a very hefty machine to run the tiling process below, which is already very memory intensive.
 
-## Convert to tiles
+Use the jupyter notebook `download_elevation_data.ipynb` to interactively download the DEM files from USGS for a particular region.
+
+```
+jupyter notebook download_elevation_data.ipynb
+```
+
+There's a few bounding boxes included in the notebook, but you'll probably want to add your own. This will download all the `.tif` DEM tiles for that region to `/data/sources/`.
+
+Alternatively, you can just run the python script if you don't want the interactive version. Be sure to set your bounding box in the script, then run it:
+
+```
+python download_elevation_data.py
+```
+
+### Convert to tiles
 
 To tile the dataset, you'll need GDAL installed, along with [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) and [rio-rgbify](https://github.com/mapbox/rio-rgbify).
 
 Note that I ran into [this issue](https://github.com/mapbox/rio-rgbify/issues/39) when running `rgbify`, with the only workaround being to manually edit the source code to remove the buggy line as [shown here](https://github.com/acalcutt/rio-rgbify/commit/6db4f8baf4d78e157e02c67b05afae49289f9ef1). Hopefully this gets fixed in the future, but as of the time of writing this the workaround is necessary.
 
-### Build a virtual dataset
+#### Build a virtual dataset
 
 First, build a virtual dataset with GDAL. This allows us to use the DEMs in the tiling step below without needing to combine the source DEMs into one giant input file.
 
@@ -24,7 +44,7 @@ First, build a virtual dataset with GDAL. This allows us to use the DEMs in the 
 gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999 data/dem.vrt data/sources/*.tif
 ```
 
-### Convert to tiled RGB images
+#### Convert to tiled RGB images
 
 > [!IMPORTANT]
 > This is an extremely memory-intensive operation if you're combining a very large set of DEM files. You will likely want to run this on a machine with as much RAM as possible.
@@ -48,7 +68,7 @@ sudo mkswap /swapfile
 sudo swapon /swapfile
 ```
 
-### Add metadata
+#### Add metadata
 
 `rgbify` does not add any metadata to the `.mbtiles` file beyond the bare minimum required fields. However, we'll want the bounding box coordinates included when converting to `.pmtiles`, otherwise they'll be set to 0 and the data will never be rendered.
 
@@ -58,7 +78,7 @@ Run this script to pull out the bounding box coordinates and add it to the `.mbt
 python add_metadata.py
 ```
 
-### Convert to `pmtiles`
+#### Convert to `pmtiles`
 
 Finally, convert to a `.pmtiles` file:
 
