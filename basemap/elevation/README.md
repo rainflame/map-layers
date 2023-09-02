@@ -32,9 +32,9 @@ python download_elevation_data.py
 
 ### Convert to tiles
 
-To tile the dataset, you'll need GDAL installed, along with [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) and [rio-rgbify](https://github.com/mapbox/rio-rgbify).
+To tile the dataset, we'll use [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) and [rio-rgbify](https://github.com/mapbox/rio-rgbify).
 
-Note that I ran into [this issue](https://github.com/mapbox/rio-rgbify/issues/39) when running `rgbify`, with the only workaround being to manually edit the source code to remove the buggy line as [shown here](https://github.com/acalcutt/rio-rgbify/commit/6db4f8baf4d78e157e02c67b05afae49289f9ef1). Hopefully this gets fixed in the future, but as of the time of writing this the workaround is necessary.
+Note that I ran into [this issue](https://github.com/mapbox/rio-rgbify/issues/39) when running `rgbify`, with the only workaround being to manually edit the source code to remove the buggy line as [shown here](https://github.com/acalcutt/rio-rgbify/commit/6db4f8baf4d78e157e02c67b05afae49289f9ef1).
 
 #### Build a virtual dataset
 
@@ -52,14 +52,14 @@ gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999 data/dem.vrt data/sour
 We'll use `rgbify` to convert the DEM sources into RGB images and build a tiled `.mbtiles` file:
 
 ```
-rio rgbify -b -10000 -i 0.1 --min-z 6 --max-z 12 -j 10 --format webp data/dem.vrt data/rgb.mbtiles
+rio rgbify -b -10000 -i 0.1 --min-z 1 --max-z 12 -j 10 --format webp data/dem.vrt data/rgb.mbtiles
 ```
 
 Note that you'll want to change the number of workers in this command (`-j 10` in the example above) to an appropriate number given your machine's number of CPU cores.
 
-As mentioned above, this is a very memory-intensive process. For reference, using a bounding box around the U.S. state of Oregon (3.2 GB of DEM files), `rgbify` used about 11.2 GB of RAM (3.5x more than the sources) to create a 1.8GB `.mbtiles` file.
+As mentioned above, this is a very memory-intensive process. For reference, using a bounding box around the U.S. state of Oregon (3.2 GB of DEM files), `rgbify` used about 11.2 GB of RAM (3.5x more than the sources) to create a 1.8GB `.mbtiles` file. Using a bounding box around the entire continental U.S. (112GB of DEM files), it used about 215GB of RAM and 450GB of swap to create a 27GB `.mbtiles` file.
 
-I was running into issues on my machine that were solved by increasing the swapfile size, which is done like this on Ubuntu:
+You'll most likely need to increase your swapfile size, which is done like this on Ubuntu:
 
 ```
 sudo swapoff /swapfile
