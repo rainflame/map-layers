@@ -30,6 +30,7 @@ def cli(workers):
         pool.join()
 
 
+# scale the elevation values from meters to feet
 translate_options = gdal.TranslateOptions(
     format="VRT",
     outputSRS="EPSG:4326",
