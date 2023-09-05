@@ -2,7 +2,13 @@
 
 ![Raw terrain RGB tiles](./elevation.png)
 
-Here we create [TerrainRGB](https://docs.mapbox.com/data/tilesets/reference/mapbox-terrain-rgb-v1/) tiles from USGS DEM sourcefiles. TerrainRGB tiles are webp image tiles that can be loaded in Maplibre-gl and dynamically rendered as hillshade, used to calculate a viewshed, or display an elevation profile across a line.
+Here we create [TerrainRGB](https://docs.mapbox.com/data/tilesets/reference/mapbox-terrain-rgb-v1/) tiles from USGS DEM source files. TerrainRGB tiles are webp image tiles that can be loaded in Maplibre-gl and dynamically rendered as hillshade, used to calculate a viewshed, or display an elevation profile across a line.
+
+In addition to TerrainRGB tiles, we also include a method for generating contour lines from the DEM sources. While you can [generate contours on the client from TerrainRGB tiles](https://github.com/onthegomap/maplibre-contour), it's cleaner to prebuild them and serve them as vector tiles to keep things fast on the client.
+
+We're using the [USGS seamless 1 arc-second dataset](https://www.usgs.gov/faqs/what-types-elevation-datasets-are-available-what-formats-do-they-come-and-where-can-i-download), which is medium resolution and good enough for most use cases. Each tile is about 50MB. There is a higher resolution 1/3 arc-second dataset that has tiles that are around 450MB. I haven't tried this dataset but it would likely require a very hefty machine to run the tiling process, which is already very memory intensive.
+
+Note that this dataset is only available for North America, but if you wanted to generate tiles for other parts of the world the [NASA's SRTM dataset](https://www2.jpl.nasa.gov/srtm/) would probably work well.
 
 ## Download the elevation data
 
@@ -12,9 +18,11 @@ Install the dependencies:
 pip install -r requirements.txt
 ```
 
-We're using the [USGS seamless 1 arc-second dataset](https://www.usgs.gov/faqs/what-types-elevation-datasets-are-available-what-formats-do-they-come-and-where-can-i-download), which is medium resolution and good enough for most use cases. Each tile is about 50MB. There is a higher resolution 1/3 arc-second dataset that has tiles that are around 450MB. I haven't tried this dataset but it would likely require a very hefty machine to run the tiling process below, which is already very memory intensive.
+If the GDAL python library isn't building, manually install it so the python version matches the version of GDAL that's installed on your system:
 
-Note that this dataset is only available for North America, but if you wanted to generate tiles for other parts of the world the [NASA's SRTM dataset](https://www2.jpl.nasa.gov/srtm/) would probably work well.
+```
+pip install GDAL==$(gdal-config --version)
+```
 
 Use the jupyter notebook `download_elevation_data.ipynb` to interactively download the DEM files from USGS for a particular region.
 
@@ -61,6 +69,7 @@ You'll most likely need to increase your swapfile size, which is done like this 
 
 ```
 sudo swapoff /swapfile
+# increase the swapfile size. For the continental U.S. I created a 500GB swapfile
 sudo fallocate -l 16G /swapfile
 sudo mkswap /swapfile
 sudo swapon /swapfile
@@ -85,6 +94,30 @@ Finally, convert to a `.pmtiles` file:
 ```
 pmtiles convert data/rgb.mbtiles data/elevation.pmtiles
 ```
+
+## Build the contour tiles
+
+Contours are created by iterating over the DEM source files and running `gdal_contour` to create 40ft contours for the file region as geojson. Then, we use `tippecanoe` to combine the geojson contours into tiles.
+
+### Create contours
+
+Run the python script to generate geojson contours for each tile in `data/`:
+
+```
+python create_contours.py --workers=8
+```
+
+Use `--workers` to specify the number of workers you want to spawn to run the processing in parallel.
+
+### Tile contours and clean up
+
+Run the tiling and clean up steps:
+
+```
+./tile_contours.sh
+```
+
+Now you should have `contours_40ft.pmtiles`!
 
 ## Rendering it
 
