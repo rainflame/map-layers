@@ -32,11 +32,13 @@ jupyter notebook download_elevation_data.ipynb
 
 There's a few bounding boxes included in the notebook, but you'll probably want to add your own. This will download all the `.tif` DEM tiles for that region to `/data/sources/`.
 
-Alternatively, you can just run the python script if you don't want the interactive version. Be sure to set your bounding box in the script, then run it:
+Alternatively, you can just run the python script if you don't want the interactive version:
 
 ```
-python download_elevation_data.py
+python download_elevation_data.py --workers=8 --bbox='-124.566244,46.864746,-116.463504,41.991794'
 ```
+
+Set `--workers` to the number of workers that should be spawned to download data in parallel and `--bbox` to the bounding box of the region for which you want data.
 
 ## Build the TerrainRGB tiles
 
