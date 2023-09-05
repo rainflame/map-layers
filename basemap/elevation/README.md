@@ -42,7 +42,7 @@ Set `--workers` to the number of workers that should be spawned to download data
 
 ## Build the TerrainRGB tiles
 
-To convert the DEM source files to TerrainRGB, we'll need to first convert them to an RGB image format. For that we'll use [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) and a tool from mapbox called [rio-rgbify](https://github.com/mapbox/rio-rgbify). This tool also tiles the data, so we'll end up with a `.mtiles` file that can be converted to a `.pmtiles` file we can use to serve tiles to the client.
+To convert the DEM source files to TerrainRGB, we'll need to first convert them to an RGB image format. For that we'll use [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) and a tool from mapbox called [rio-rgbify](https://github.com/mapbox/rio-rgbify). This tool also tiles the data, so we'll end up with a `.mbtiles` file that can be converted to a `.pmtiles` file we can use to serve tiles to the client.
 
 ### Build a virtual dataset
 
