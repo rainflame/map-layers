@@ -2,6 +2,7 @@ import glob
 import multiprocessing
 import os
 import click
+import shutil
 
 from tqdm import tqdm
 from osgeo import gdal, ogr, osr
@@ -18,6 +19,8 @@ def cli(workers):
 
     # create a data/temp/ directory if it doesn't exist
     try:
+        if os.path.exists("data/temp"):
+            shutil.rmtree("data/temp")
         os.mkdir("data/temp")
     except:
         pass
@@ -52,18 +55,19 @@ def create_contours(path):
 
     # create a new empty geojson dataset
     out_dataset = ogr.GetDriverByName("GeoJSONSeq").CreateDataSource(
-        "data/temp/{}.geojson".format(file)
+        "data/temp/{}.geojson".format(file),
     )
+
     # see https://github.com/OSGeo/gdal/blob/83425621471d4987087317999d6fff3a482da88f/autotest/alg/contour.py#L105-L112
     contour_layer = out_dataset.CreateLayer("elevation", sr)
-    field_defn = ogr.FieldDefn("ID", ogr.OFTInteger)
-    contour_layer.CreateField(field_defn)
-    field_defn = ogr.FieldDefn("elevation", ogr.OFTReal)
-    contour_layer.CreateField(field_defn)
+    contour_layer.CreateField(ogr.FieldDefn("ID", ogr.OFTInteger))
+    contour_layer.CreateField(ogr.FieldDefn("elevation", ogr.OFTReal))
 
+    # create the contours
     try:
         gdal.ContourGenerate(vds.GetRasterBand(1), 40, 0, [], 0, 0, contour_layer, 0, 1)
     except:
+        print("error generating contours for {}".format(file))
         pass
 
 

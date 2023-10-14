@@ -57,6 +57,9 @@ def cli(workers, bbox):
 
     total_items = data["total"]
     n = len(data["items"])
+    for item in data["items"]:
+        urls.append(item["downloadURL"])
+        download_bytes += item["sizeInBytes"]
 
     print("Getting list of tile URLs in bounding box region...")
     with tqdm.tqdm(total=total_items) as pbar:
