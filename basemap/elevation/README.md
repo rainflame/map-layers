@@ -8,11 +8,13 @@ In addition to TerrainRGB tiles, we also include a method for generating contour
 
 We're using the [USGS seamless 1 arc-second dataset](https://www.usgs.gov/faqs/what-types-elevation-datasets-are-available-what-formats-do-they-come-and-where-can-i-download), which is medium resolution and good enough for most use cases. Each tile is about 50MB. There is a higher resolution 1/3 arc-second dataset that has tiles that are around 450MB. I haven't tried this dataset but it would likely require a very hefty machine to run the tiling process, which is already very memory intensive.
 
-Note that this dataset is only available for North America, but if you wanted to generate tiles for other parts of the world the [NASA's SRTM dataset](https://www2.jpl.nasa.gov/srtm/) would probably work well.
+Note that this dataset is only available for North America, but if you wanted to generate tiles for other parts of the world [NASA's SRTM dataset](https://www2.jpl.nasa.gov/srtm/) would probably work well.
 
-## Download the elevation data
+## Install
 
-Install the dependencies:
+You'll need `GDAL`, `tippecanoe`, `pmtiles`, and `jq` installed on your machine to run these scripts.
+
+Install the python dependencies:
 
 ```
 pip install -r requirements.txt
@@ -24,15 +26,9 @@ If the GDAL python library isn't building, manually install it so the python ver
 pip install GDAL==$(gdal-config --version)
 ```
 
-Use the jupyter notebook `download_elevation_data.ipynb` to interactively download the DEM files from USGS for a particular region.
+## Download the elevation data
 
-```
-jupyter notebook download_elevation_data.ipynb
-```
-
-There's a few bounding boxes included in the notebook, but you'll probably want to add your own. This will download all the `.tif` DEM tiles for that region to `/data/sources/`.
-
-Alternatively, you can just run the python script if you don't want the interactive version:
+Run this script to download the elevation data for a particular bounding box from the [National Map](https://apps.nationalmap.gov/tnmaccess/#/) to `/data/sources/`:
 
 ```
 python download_elevation_data.py --workers=8 --bbox='-124.566244,46.864746,-116.463504,41.991794'
@@ -54,9 +50,6 @@ gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999 data/dem.vrt data/sour
 
 ### Convert to tiled RGB images
 
-> [!IMPORTANT]
-> This is an extremely memory-intensive operation if you're combining a very large set of DEM files. You will likely want to run this on a machine with as much RAM as possible.
-
 We'll use `rgbify` to convert the DEM sources into RGB images and build a tiled `.mbtiles` file:
 
 ```
@@ -65,7 +58,10 @@ rio rgbify -b -10000 -i 0.1 --min-z 1 --max-z 12 -j 10 --format webp data/dem.vr
 
 Note that you'll want to change the number of workers in this command (`-j 10` in the example above) to an appropriate number given your machine's number of CPU cores.
 
-As mentioned above, this is a very memory-intensive process. For reference, using a bounding box around the U.S. state of Oregon (3.2 GB of DEM files), `rgbify` used about 11.2 GB of RAM (3.5x more than the sources) to create a 1.8GB `.mbtiles` file. Using a bounding box around the entire continental U.S. (112GB of DEM files), it used about 215GB of RAM and 450GB of swap to create a 27GB `.mbtiles` file.
+> [!WARNING]
+> This is an extremely memory-intensive operation if you're combining a very large set of DEM files. You will likely want to run this on a machine with as much RAM as possible.
+
+For reference, using a bounding box around the U.S. state of Oregon (3.2 GB of DEM files), `rgbify` used about 11.2 GB of RAM (3.5x more than the sources) to create a 1.8GB `.mbtiles` file. Using a bounding box around the entire continental U.S. (112GB of DEM files), it used about 215GB of RAM and 450GB of swap to create a 27GB `.mbtiles` file.
 
 You'll most likely need to increase your swapfile size, which is done like this on Ubuntu:
 

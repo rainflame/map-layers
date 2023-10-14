@@ -8,11 +8,6 @@ import multiprocessing
 # using the 1 arc-second dataset, but could use 1/3 arc-second for higher resolution
 dataset = "National Elevation Dataset (NED) 1 arc-second"
 
-# us_continental_bbox = "-125.0011,24.9493,-66.9326,49.5904"
-# us_west_bbox = "-100.336147,50.059513,-127.850165,29.983312"
-# oregon_bbox = "-124.566244,46.864746,-116.463504,41.991794"
-
-
 # use urllib3 to download a url
 def request(method, url):
     try:
@@ -46,7 +41,7 @@ def download(url):
     help="Bounding box to download data for",
 )
 def cli(workers, bbox):
-    print("Getting region details...")
+    print("Getting region details from the National Map API...")
     # USGS national map api endpoint to list DEMs for our bounding box
     url = (
         "https://tnmaccess.nationalmap.gov/api/v1/products?datasets={}&bbox={}".format(
