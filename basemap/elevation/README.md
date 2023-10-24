@@ -99,6 +99,14 @@ Finally, convert to a `.pmtiles` file:
 pmtiles convert data/output/elevation.mbtiles data/output/elevation.pmtiles
 ```
 
+You should now have the final output files:
+
+```
+data/output/
+    elevation.mbtiles
+    elevation.pmtiles
+```
+
 ## Build the contour tiles
 
 Contours are created by iterating over the DEM source files and running `gdal_contour` to create 40ft contours for the file region as geojson. Then, we use `tippecanoe` to combine the geojson contours into tiles.
@@ -135,22 +143,22 @@ data/output/
 
 To load the TerrainRGB elevation data in Maplibre-gl as hillshade, you can load it as a new layer:
 
-```
+```json
 {
-    type: "raster-dem",
-    url: `pmtiles://http://localhost:8080/elevation.pmtiles`,
-    tileSize: 512,
+  "type": "raster-dem",
+  "url": "pmtiles://http://localhost:8080/elevation.pmtiles",
+  "tileSize": 512
 }
 ```
 
 and render it with a style spec like this:
 
-```
+```json
 {
-  id: "hillshade",
-  type: "hillshade",
-  source: "elevation",
-  paint: {
+  "id": "hillshade",
+  "type": "hillshade",
+  "source": "elevation",
+  "paint": {
     "hillshade-exaggeration": 0.5,
     "hillshade-shadow-color": "#5a5a5a",
     "hillshade-highlight-color": "#FFFFFF",
@@ -164,16 +172,16 @@ and render it with a style spec like this:
 
 Contours are split into different three different layers: `contours_1000`, `contours_200`, and `contours_40`. They can be loaded like this:
 
-```
+```json
 {
-    type: "vector",
-    url: `pmtiles://http://localhost:8080/contours.pmtiles`,
+  "type": "vector",
+  "url": "pmtiles://http://localhost:8080/contours.pmtiles"
 }
 ```
 
 and rendered with a style spec like this, using 200 ft contours as an example:
 
-```
+```json
 {
   "id": "contour_200ft",
   "type": "line",
@@ -194,5 +202,5 @@ and rendered with a style spec like this, using 200 ft contours as an example:
     },
     "line-opacity": 0.8
   }
-},
+}
 ```
