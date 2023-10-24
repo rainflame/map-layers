@@ -1,3 +1,7 @@
+# ignore any data dirs
+data/
+data_*/
+
 .vscode
 
 # Byte-compiled / optimized / DLL files
