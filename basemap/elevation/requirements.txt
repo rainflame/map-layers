@@ -17,4 +17,4 @@ rio-mucho==1.0.0
 rio-rgbify==0.4.0
 snuggs==1.4.7
 tqdm==4.66.1
-urllib3==2.0.6
+urllib3==2.0.7
