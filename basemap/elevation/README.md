@@ -26,6 +26,12 @@ If the GDAL python library isn't building, manually install it so the python ver
 pip install GDAL==$(gdal-config --version)
 ```
 
+Create the data directories:
+
+```
+mkdir -p data/sources/ && mkdir -p data/temp/ && mkdir data/output/
+```
+
 ## Download the elevation data
 
 Run this script to download the elevation data for a particular bounding box from the [National Map](https://apps.nationalmap.gov/tnmaccess/#/) to `/data/sources/`:
@@ -38,14 +44,14 @@ Set `--workers` to the number of workers that should be spawned to download data
 
 ## Build the TerrainRGB tiles
 
-To convert the DEM source files to TerrainRGB, we'll need to first convert them to an RGB image format. For that we'll use [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) and a tool from mapbox called [rio-rgbify](https://github.com/mapbox/rio-rgbify). This tool also tiles the data, so we'll end up with a `.mbtiles` file that can be converted to a `.pmtiles` file we can use to serve tiles to the client.
+To convert the DEM source files to TerrainRGB, we'll need to first convert them to an RGB image format. For that we'll use [rasterio](https://rasterio.readthedocs.io/en/latest/index.html) and a tool from mapbox called [rio-rgbify](https://github.com/mapbox/rio-rgbify). This tool also tiles the data, so we'll end up with a `.mbtiles` file.
 
 ### Build a virtual dataset
 
 First, build a virtual dataset with GDAL. This allows us to use the DEMs in the tiling step below without needing to combine the source DEMs into one giant input file.
 
 ```
-gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999 data/dem.vrt data/sources/*.tif
+gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999 data/temp/dem.vrt data/sources/*.tif
 ```
 
 ### Convert to tiled RGB images
@@ -53,7 +59,7 @@ gdalbuildvrt -overwrite -srcnodata -9999 -vrtnodata -9999 data/dem.vrt data/sour
 We'll use `rgbify` to convert the DEM sources into RGB images and build a tiled `.mbtiles` file:
 
 ```
-rio rgbify -b -10000 -i 0.1 --min-z 1 --max-z 12 -j 10 --format webp data/dem.vrt data/rgb.mbtiles
+rio rgbify -b -10000 -i 0.1 --min-z 1 --max-z 12 -j 10 --format webp data/temp/dem.vrt data/output/elevation.mbtiles
 ```
 
 Note that you'll want to change the number of workers in this command (`-j 10` in the example above) to an appropriate number given your machine's number of CPU cores.
@@ -79,10 +85,10 @@ Note that I ran into [this issue](https://github.com/mapbox/rio-rgbify/issues/39
 
 `rgbify` does not add any metadata to the `.mbtiles` file beyond the bare minimum required fields. However, we'll want the bounding box coordinates included when converting to `.pmtiles`, otherwise they'll be set to 0 and the data will never be rendered.
 
-Run this script to pull out the bounding box coordinates and add it to the `.mbtiles` file metadata:
+Run this script to pull out the bounding box coordinates and add it to the `data/output/elevation.mbtiles` file metadata:
 
 ```
-python add_metadata.py
+python add_metadata.py --input-file="data/output/elevation.pmtiles"
 ```
 
 ### Convert to `pmtiles`
@@ -90,7 +96,7 @@ python add_metadata.py
 Finally, convert to a `.pmtiles` file:
 
 ```
-pmtiles convert data/rgb.mbtiles data/elevation.pmtiles
+pmtiles convert data/output/elevation.mbtiles data/output/elevation.pmtiles
 ```
 
 ## Build the contour tiles
@@ -99,7 +105,7 @@ Contours are created by iterating over the DEM source files and running `gdal_co
 
 ### Create contours
 
-Run the python script to generate geojson contours for each tile in `data/`:
+Run the python script to generate geojson contours for each DEM tif tile in `data/sources/`:
 
 ```
 python create_contours.py --workers=8
@@ -109,17 +115,25 @@ Use `--workers` to specify the number of workers you want to spawn to run the pr
 
 ### Tile contours and clean up
 
-Run the tiling and clean up steps:
+Next, we tile the contours and define zoom ranges at which different contour intervals should be shown. 1000 ft contours are shown from z10-z20, 200 ft contours are shown from z11-z20, and 40 ft contours are shown from z12-z20.
 
 ```
 ./tile_contours.sh
 ```
 
-Now you should have `contours_40ft.pmtiles`!
+You should now have the final output files:
 
-## Rendering it
+```
+data/output/
+    contours.mbtiles
+    contours.pmtiles
+```
 
-Now you should be able to load the TerrainRGB elevation data in Maplibre-gl. For example, to render hillshade you can add a new layer:
+## Rendering
+
+### Hillshade
+
+To load the TerrainRGB elevation data in Maplibre-gl as hillshade, you can load it as a new layer:
 
 ```
 {
@@ -144,4 +158,41 @@ and render it with a style spec like this:
     "hillshade-illumination-direction": 335,
     "hillshade-illumination-anchor": "viewport",
 }
+```
+
+### Contours
+
+Contours are split into different three different layers: `contours_1000`, `contours_200`, and `contours_40`. They can be loaded like this:
+
+```
+{
+    type: "vector",
+    url: `pmtiles://http://localhost:8080/contours.pmtiles`,
+}
+```
+
+and rendered with a style spec like this, using 200 ft contours as an example:
+
+```
+{
+  "id": "contour_200ft",
+  "type": "line",
+  "source": "contours",
+  "source-layer": "contour_200",
+  "layout": {
+    "line-join": "round",
+    "line-cap": "round"
+  },
+  "paint": {
+    "line-color": "#FF0000",
+    "line-width": {
+      "base": 1,
+      "stops": [
+        [10, 0.5],
+        [20, 2]
+      ]
+    },
+    "line-opacity": 0.8
+  }
+},
 ```
