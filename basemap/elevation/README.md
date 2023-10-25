@@ -123,7 +123,7 @@ Use `--workers` to specify the number of workers you want to spawn to run the pr
 
 ### Tile contours and clean up
 
-Next, we tile the contours and define zoom ranges at which different contour intervals should be shown. 1000 ft contours are shown from z10-z20, 200 ft contours are shown from z11-z20, and 40 ft contours are shown from z12-z20.
+Next, we tile the contours and define zoom ranges at which different contour intervals should be shown. 1000 ft contours are shown from z10-z14, 200 ft contours are shown from z11-z14, and 40 ft contours are shown from z12-z14.
 
 ```
 ./tile_contours.sh
