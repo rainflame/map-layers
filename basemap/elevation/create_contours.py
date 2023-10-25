@@ -22,6 +22,8 @@ def cli(workers):
         if os.path.exists("data/temp"):
             shutil.rmtree("data/temp")
         os.mkdir("data/temp")
+        for i in [40, 200, 1000]:
+            os.mkdir("data/temp/{}".format(i))
     except:
         pass
 
@@ -53,22 +55,24 @@ def create_contours(path):
     sr = osr.SpatialReference()
     sr.ImportFromEPSG(4326)
 
-    # create a new empty geojson dataset
-    out_dataset = ogr.GetDriverByName("GeoJSONSeq").CreateDataSource(
-        "data/temp/{}.geojson".format(file),
-    )
+    # generate contours at 40, 200, and 1000 feet intervals
+    for i in [40, 200, 1000]:
 
-    # see https://github.com/OSGeo/gdal/blob/83425621471d4987087317999d6fff3a482da88f/autotest/alg/contour.py#L105-L112
-    contour_layer = out_dataset.CreateLayer("elevation", sr)
-    contour_layer.CreateField(ogr.FieldDefn("ID", ogr.OFTInteger))
-    contour_layer.CreateField(ogr.FieldDefn("elevation", ogr.OFTReal))
+        # using geojsonseq to allow reading features in parallel with tippecanoe
+        out_dataset = ogr.GetDriverByName("GeoJSONSeq").CreateDataSource(
+            "data/temp/{}/{}.geojsons".format(i, file),
+        )
 
-    # create the contours
-    try:
-        gdal.ContourGenerate(vds.GetRasterBand(1), 40, 0, [], 0, 0, contour_layer, 0, 1)
-    except:
-        print("error generating contours for {}".format(file))
-        pass
+        contour_layer = out_dataset.CreateLayer("elevation", sr)
+        contour_layer.CreateField(ogr.FieldDefn("ID", ogr.OFTInteger))
+        contour_layer.CreateField(ogr.FieldDefn("elevation", ogr.OFTReal))
+
+        # create the contours
+        try:
+            gdal.ContourGenerate(vds.GetRasterBand(1), i, 0, [], 0, 0, contour_layer, 0, 1)
+        except:
+            print("error generating contours for {}".format(file))
+            pass
 
 
 if __name__ == "__main__":

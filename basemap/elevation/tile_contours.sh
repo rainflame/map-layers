@@ -2,21 +2,18 @@
 
 echo -e "\nTiling dataset...\n"
 
-# see https://github.com/nst-guide/terrain/blob/4671546d2a17b1ed4e71a2e1648e5ffc595c3217/README.md?plain=1#L452-L468
-tippecanoe -Z10 -z18 -P -y elevation -l contour_1000 \
-    -C 'jq "if .properties.elevation % 1000 == 0 then . else {} end"' \
+# tile contours, creating three separate files with 40ft, 200ft, and 1000ft contours at different zoom levels
+tippecanoe -Z10 -z20 -P -y elevation -l contour_1000 \
     -o data/temp/contour_1000.mbtiles \
-    data/temp/*.geojson --force
+    data/temp/1000/*.geojsons --force --read-parallel
 
-tippecanoe -Z11 -z18 -P -y elevation -l contour_200 \
-    -C 'jq "if .properties.elevation % 200 == 0 then . else {} end"' \
+tippecanoe -Z11 -z20 -P -y elevation -l contour_200 \
     -o data/temp/contour_200.mbtiles \
-    data/temp/*.geojson --force
+    data/temp/200/*.geojsons --force --read-parallel
 
-tippecanoe -Z12 -z18 -P -y elevation -l contour_40 \
-    -C 'jq "if .properties.elevation % 40 == 0 then . else {} end"' \
+tippecanoe -Z12 -z20 -P -y elevation -l contour_40 \
     -o data/temp/contour_40.mbtiles \
-    data/temp/*.geojson --force
+    data/temp/40/*.geojsons --force --read-parallel
 
 echo -e "\nMerging layers...\n"
 

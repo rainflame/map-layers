@@ -12,7 +12,7 @@ Note that this dataset is only available for North America, but if you wanted to
 
 ## Install
 
-You'll need `GDAL`, `tippecanoe`, `pmtiles`, and `jq` installed on your machine to run these scripts.
+You'll need `GDAL`, `tippecanoe`, and `pmtiles` installed on your machine to run these scripts.
 
 Install the python dependencies:
 
