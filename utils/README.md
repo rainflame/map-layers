@@ -17,7 +17,17 @@ This tool creates a geojson file with a polygon representing a particular region
 Run:
 
 ```
-python bounding_box_to_geojson.py --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
+python bounding_box_to_geojson.py --bbox="-123.417224,43.022586,-118.980589,45.278084"
 ```
 
 which should produce `data/output/bbox.geojson`.
+
+## GeoJSON to bounding box
+
+This tool assumes there's a geojson file with a single polygon feature. Get the bounding box:
+
+```
+python geojson_to_bounding_box.py --input-file="data/input/shape.geojson"
+```
+
+which should print something like `-123.417224,43.022586,-118.980589,45.278084`.
