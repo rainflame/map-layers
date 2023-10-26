@@ -4,7 +4,7 @@ mkdir -p data/output
 
 echo -e "\nTiling dataset...\n"
 
-tippecanoe -zg -o data/output/glaciers.mbtiles --drop-densest-as-needed -l glaciers data/temp/glaciers.geojson --force
+tippecanoe -Z1 -z18 -P -o data/output/glaciers.mbtiles --drop-densest-as-needed -l glaciers data/temp/glaciers.geojson --force
 
 echo -e "\nConverting to pmtiles format...\n"
 
