@@ -2,18 +2,12 @@
 
 ## Install
 
-You'll need `GDAL`, `tippecanoe`, and `pmtiles` installed on your machine to run these scripts.
+Ensure you've [activated the conda environment](../../README.md#building-datasets).
 
-Install the python dependencies:
-
-```
-pip install -r requirements.txt
-```
-
-If the GDAL python library isn't building, manually install it so the python version matches the version of GDAL that's installed on your system:
+Create the data directories:
 
 ```
-pip install GDAL==$(gdal-config --version)
+mkdir -p data/sources/ && mkdir -p data/temp/ && mkdir -p data/output/
 ```
 
 ## Download data

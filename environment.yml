@@ -1,0 +1,20 @@
+name: pika-datasets
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - click
+  - tqdm
+  - gdal
+  - requests
+  - networkx
+  - shapely
+  - lxml
+  - geopandas
+  - rasterio
+  - geojson
+  - tippecanoe
+  - pyproj
+  - pip:
+      - rio-rgbify
+      - simplification

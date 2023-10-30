@@ -4,14 +4,10 @@ The source code to generate the datasets and maps available on [pikamaps.com](ht
 
 ## Building datasets
 
-To build the datasets, start by installing [GDAL](https://gdal.org/download.html) and Python 3.8+ if you haven't already.
-
-GDAL installation on Linux:
+To build the datasets, activate the conda environment:
 
 ```
-sudo apt update
-sudo apt install libpq-dev gdal-bin libgdal-dev
-
+conda env create -f environment.yml
 ```
 
 If you're going to build the vector basemap tiles, you'll also need Java 17+ installed.

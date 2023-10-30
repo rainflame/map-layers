@@ -4,11 +4,7 @@ Some general utilities that may be helpful for generating and manipulating datas
 
 ## Install
 
-Install the python dependencies:
-
-```
-pip install -r requirements.txt
-```
+Ensure you've [activated the conda environment](../../README.md#building-datasets).
 
 ## Bounding box to GeoJSON
 

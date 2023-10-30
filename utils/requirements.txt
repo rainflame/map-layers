@@ -1,4 +1,0 @@
-click==8.1.7
-geojson==3.0.1
-numpy==1.26.1
-shapely==2.0.2

@@ -12,19 +12,7 @@ Note that this dataset is only available for North America, but if you wanted to
 
 ## Install
 
-You'll need `GDAL`, `tippecanoe`, and `pmtiles` installed on your machine to run these scripts.
-
-Install the python dependencies:
-
-```
-pip install -r requirements.txt
-```
-
-If the GDAL python library isn't building, manually install it so the python version matches the version of GDAL that's installed on your system:
-
-```
-pip install GDAL==$(gdal-config --version)
-```
+Ensure you've [activated the conda environment](../../README.md#building-datasets).
 
 Create the data directories:
 
