@@ -12,7 +12,7 @@ gdal.UseExceptions()
 
 
 @click.command()
-@click.option("--workers", default=4, help="Number of workers to use")
+@click.option("--workers", default=multiprocessing.cpu_count(), help="Number of workers to use")
 def cli(workers):
     # get all .tif files in the data/sources/ directory
     files = glob.glob("data/sources/*.tif")

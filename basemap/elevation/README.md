@@ -25,10 +25,8 @@ mkdir -p data/sources/ && mkdir -p data/temp/ && mkdir -p data/output/
 Run this script to download the elevation data for a particular bounding box from the [National Map](https://apps.nationalmap.gov/tnmaccess/#/) to `/data/sources/`:
 
 ```
-python download_elevation_data.py --workers=8 --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
+python download_elevation_data.py --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
 ```
-
-Set `--workers` to the number of workers that should be spawned to download data in parallel and `--bbox` to the bounding box of the region for which you want data.
 
 ## Build the TerrainRGB tiles
 

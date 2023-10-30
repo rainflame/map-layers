@@ -34,7 +34,7 @@ def download(url):
 
 # click cli to get number of workers and bounding box
 @click.command()
-@click.option("--workers", default=4, help="Number of workers to use")
+@click.option("--workers", default=multiprocessing.cpu_count(), help="Number of workers to use")
 @click.option(
     "--bbox",
     default="-124.566244,46.864746,-116.463504,41.991794",
