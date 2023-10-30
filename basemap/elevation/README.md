@@ -1,6 +1,6 @@
 # Elevation tiles
 
-![Raw terrain RGB tiles](./elevation.png)
+![Raw terrain RGB tiles and hillshade + contour tiles](./elevation.jpg)
 
 Here we create [TerrainRGB](https://docs.mapbox.com/data/tilesets/reference/mapbox-terrain-rgb-v1/) tiles from USGS DEM source files. TerrainRGB tiles are webp image tiles that can be loaded in Maplibre-gl and dynamically rendered as hillshade, used to calculate a viewshed, or display an elevation profile across a line.
 
