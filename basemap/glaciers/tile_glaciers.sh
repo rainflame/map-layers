@@ -15,4 +15,4 @@ echo -e "\nConverting to pmtiles format...\n"
 pmtiles convert data/output/glaciers.mbtiles data/output/glaciers.pmtiles
 pmtiles convert data/output/glacier_labels.mbtiles data/output/glacier_labels.pmtiles
 
-echo -e "\nDone, created: \ndata/output/glaciers.mbtiles\ndata/output/glaciers.pmtiles\nglaciers/output/glacier_labels.mbtiles\ndata/output/glacier_labels.pmtiles\n"
+echo -e "\nDone, created: \ndata/output/glaciers.mbtiles\ndata/output/glaciers.pmtiles\ndata/output/glacier_labels.mbtiles\ndata/output/glacier_labels.pmtiles\n"
