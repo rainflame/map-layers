@@ -21,10 +21,20 @@ This dataset contains multiple glacier boundaries at different timestamps, so yo
 Run this script to trim and filter the dataset:
 
 ```
-python trim_and_filter_glaciers.py --filter-year=2023 --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759
+python trim_and_filter_glaciers.py --filter-year=2023 --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
 ```
 
 You can also specify a custom input and output destination with `--input-file` and `--output-file`.
+
+## Create polygon centerlines
+
+Next, we create the lines that we'll use to place the labels when rendering the map. We're going to approximate the [medial axis](https://en.wikipedia.org/wiki/Medial_axis) by creating a [skeleton](https://scikit-geometry.github.io/scikit-geometry/skeleton.html) for each polygon, then choosing the longest set of lines as the medial axis. This has the effect of creating a long centerline down each polygon.
+
+```
+python ../../utils/polygons_to_medial_axes.py --input-file="data/temp/glaciers.geojson" --output-file="data/temp/axes.geojson"
+```
+
+## Tile the dataset
 
 Now we can create a tiled version of the boundaries:
 
@@ -38,4 +48,6 @@ You should now have the final output files:
 data/output/
     glaciers.mbtiles
     glaciers.pmtiles
+    glacier_labels.mbtiles
+    glacier_labels.pmtiles
 ```
