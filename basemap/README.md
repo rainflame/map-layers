@@ -25,10 +25,16 @@ First, create the output directory:
 mkdir -p data/output/
 ```
 
-Ensure you have `tippecanoe` installed and run the `tile-join` utility to combine the vector datasets you've generated:
+To combine all layers you've generated, run:
 
 ```
-tile-join -o data/output/basemap.mbtiles elevation/data/output/contours.mbtiles glaciers/data/output/glaciers.mbtiles
+./tile_layers.sh
+```
+
+Or, to add one or two layers to an existing basemap, run:
+
+```
+tile-join -o data/output/basemap.mbtiles glaciers/data/output/glaciers.mbtiles data/output/basemap.mbtiles --force
 ```
 
 The exception is `elevation/data/output/elevation.mbtiles` that is raster data and therefore must be loaded in Maplibre-gl as its own layer.
