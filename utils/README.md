@@ -6,6 +6,22 @@ Some general utilities that may be helpful for generating and manipulating datas
 
 Ensure you've [activated the conda environment](../../README.md#building-datasets).
 
+## Polygons to weighted medial axes
+
+Here we take a geojson file of polygons and produce a series of lines representing their approximate [medial axes](https://en.wikipedia.org/wiki/Medial_axis). This will not produce the exact medial axis, but rather an approximation that passes through the most visually bulky sections of the polygon. Any properties of the original polygons are preserved in the output lines.
+
+```
+python polygons_to_weighted_medial_axes.py --input-file="data/input/lakes.geojson" --output-file="data/output/lake_axes.geojson"
+```
+
+## Simplify lines
+
+Take a geojson file of lines and produces a simplified version of them using a topology-preserving version of the [Visvalingam-Whyatt algorithm](https://en.wikipedia.org/wiki/Visvalingam%E2%80%93Whyatt_algorithm). Any properties of the original lines are preserved in the output lines.
+
+```
+simplify_lines.py --input-file="data/input/axes.geojson" --output-file="data/output/axes-simple.geojson" --tolerance=0.0000001
+```
+
 ## Bounding box to GeoJSON
 
 This tool creates a geojson file with a polygon representing a particular region, which can be useful for creating pmtiles extracts.
