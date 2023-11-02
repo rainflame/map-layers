@@ -31,7 +31,7 @@ You can also specify a custom input and output destination with `--input-file` a
 Next, we create the lines that we'll use to place the labels when rendering the map. We're going to approximate the [medial axis](https://en.wikipedia.org/wiki/Medial_axis) by creating a [skeleton](https://scikit-geometry.github.io/scikit-geometry/skeleton.html) for each polygon, then choosing the longest set of lines as the medial axis. This has the effect of creating a long centerline down each polygon.
 
 ```
-python ../../utils/polygons_to_medial_axes.py --input-file="data/temp/glaciers.geojson" --output-file="data/temp/axes.geojson"
+python clean_and_label_glaciers.py
 ```
 
 ## Tile the dataset
