@@ -14,12 +14,12 @@ Here we take a geojson file of polygons and produce a series of lines representi
 python polygons_to_weighted_medial_axes.py --input-file="data/input/lakes.geojson" --output-file="data/output/lake_axes.geojson"
 ```
 
-## Simplify lines
+## Simplify Polygons or Lines
 
-Take a geojson file of lines and produces a simplified version of them using a topology-preserving version of the [Visvalingam-Whyatt algorithm](https://en.wikipedia.org/wiki/Visvalingam%E2%80%93Whyatt_algorithm). Any properties of the original lines are preserved in the output lines.
+Take a geojson file of lines or polygons and produces a simplified version of them using a topology-preserving version of the [Douglas-Peucker algorithm](https://en.wikipedia.org/wiki/Ramer%E2%80%93Douglas%E2%80%93Peucker_algorithm). Any properties of the input features are preserved in the output.
 
 ```
-simplify_lines.py --input-file="data/input/axes.geojson" --output-file="data/output/axes-simple.geojson" --tolerance=0.0000001
+simplify.py --input-file="data/input/axes.geojson" --output-file="data/output/axes-simple.geojson" --tolerance=0.0001
 ```
 
 ## Bounding box to GeoJSON
