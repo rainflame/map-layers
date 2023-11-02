@@ -74,42 +74,79 @@ def get_heaviest_path(graph, node_weights, node, visited):
 # then, we join the two paths together to get the medial axis
 def get_weighted_medial_axis(polygon):
     geom, properties = polygon
-    # need to flip the coordinates for skgeom
-    polygon = sg.Polygon([(y, x) for x, y, _ in geom.exterior.coords])
-    # simplify the geometry to speed up the medial axis calculation
-    polygon = sg.simplify(polygon, 0.5)
-    skeleton = sg.skeleton.create_interior_straight_skeleton(polygon)
+    try:
+        # need to flip the coordinates for skgeom
+        polygon = sg.Polygon([(y, x) for x, y, _ in geom.exterior.coords])
+        # simplify the geometry to speed up the medial axis calculation
+        polygon = sg.simplify(polygon, 0.5)
+        skeleton = sg.skeleton.create_interior_straight_skeleton(polygon)
 
-    graph = nx.Graph()
+        graph = nx.Graph()
 
-    for h in skeleton.halfedges:
-        if h.is_bisector:
-            p1 = h.vertex.point
-            p2 = h.opposite.vertex.point
-            # need to re-flip the coordinates
-            graph.add_edge(
-                (float(p1.y()), float(p1.x())), (float(p2.y()), float(p2.x()))
+        for h in skeleton.halfedges:
+            if h.is_bisector:
+                p1 = h.vertex.point
+                p2 = h.opposite.vertex.point
+                # need to re-flip the coordinates
+                graph.add_edge(
+                    (float(p1.y()), float(p1.x())), (float(p2.y()), float(p2.x()))
+                )
+
+        # get the center of the graph
+        center = nx.center(graph)[0]
+
+        node_weights = {}
+        dfs_sum_weights(node_weights, graph, center, set())
+
+        neighbors = graph.neighbors(center)
+
+        # get the two neighbors with the highest weights
+        neighbor_weights = [(n, node_weights[n]) for n in neighbors]
+        neighbor_weights.sort(key=lambda x: x[1], reverse=True)
+
+        # get the two heaviest paths
+        heaviest_paths = []
+        for n, _ in neighbor_weights[:2]:
+            heaviest_paths.append(
+                get_heaviest_path(graph, node_weights, n, set([center]))
             )
 
-    # get the center of the graph
-    center = nx.center(graph)[0]
+        joined_line = LineString(heaviest_paths[0] + [center] + heaviest_paths[1][::-1])
+        return (joined_line, properties)
+    except Exception as e:
+        print(e)
+        print(f"Error processing polygon with properties: {properties}")
+        print("Skipped polygon")
+        return (None, properties)
 
-    node_weights = {}
-    dfs_sum_weights(node_weights, graph, center, set())
 
-    neighbors = graph.neighbors(center)
+def weighted_medial_axes_from_geojson(input_file, output_file, workers):
+    # check input exists
+    if not os.path.exists(input_file):
+        raise Exception(f"Cannot open {input_file}")
 
-    # get the two neighbors with the highest weights
-    neighbor_weights = [(n, node_weights[n]) for n in neighbors]
-    neighbor_weights.sort(key=lambda x: x[1], reverse=True)
+    # check path to output exists
+    output_dir = os.path.dirname(output_file)
+    if output_dir != "" and not os.path.exists(output_dir):
+        os.makedirs(output_dir)
 
-    # get the two heaviest paths
-    heaviest_paths = []
-    for n, _ in neighbor_weights[:2]:
-        heaviest_paths.append(get_heaviest_path(graph, node_weights, n, set([center])))
+    geoms, crs = load_geojson_geometries(input_file)
 
-    joined_line = LineString(heaviest_paths[0] + [center] + heaviest_paths[1][::-1])
-    return (joined_line, properties)
+    lines = []
+    with multiprocessing.Pool(workers) as p:
+        for line, properties in tqdm(
+            p.imap_unordered(get_weighted_medial_axis, geoms), total=len(geoms)
+        ):
+            if line is None:
+                continue
+            line = geojson.Feature(geometry=line, properties=properties)
+            lines.append(line)
+        p.close()
+        p.join()
+
+    with open(output_file, "w") as f:
+        gj = geojson.FeatureCollection(lines, crs=crs)
+        geojson.dump(gj, f)
 
 
 @click.command()
@@ -127,30 +164,7 @@ def get_weighted_medial_axis(polygon):
     required=True,
 )
 def cli(workers, input_file, output_file):
-    # check input exists
-    if not os.path.exists(input_file):
-        raise Exception(f"Cannot open {input_file}")
-
-    # check path to output exists
-    output_dir = os.path.dirname(output_file)
-    if output_dir != "" and not os.path.exists(output_dir):
-        os.makedirs(output_dir)
-
-    geoms, crs = load_geojson_geometries(input_file)
-
-    lines = []
-    with multiprocessing.Pool(workers) as p:
-        for line, properties in tqdm(
-            p.imap_unordered(get_weighted_medial_axis, geoms), total=len(geoms)
-        ):
-            line = geojson.Feature(geometry=line, properties=properties)
-            lines.append(line)
-        p.close()
-        p.join()
-
-    with open(output_file, "w") as f:
-        gj = geojson.FeatureCollection(lines, crs=crs)
-        geojson.dump(gj, f)
+    weighted_medial_axes_from_geojson(input_file, output_file, workers)
 
 
 if __name__ == "__main__":
