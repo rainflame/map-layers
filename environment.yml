@@ -16,6 +16,7 @@ dependencies:
   - tippecanoe
   - pyproj
   - scikit-geometry
+  - rtree
   - pip
   - pip:
       - rio-rgbify
