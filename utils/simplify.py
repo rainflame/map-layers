@@ -6,6 +6,11 @@ import shapely
 from tqdm import tqdm
 
 
+def simplify_geometry(geom, tolerance):
+    simplified_polygon = geom.simplify(tolerance, preserve_topology=True)
+    return simplified_polygon
+
+
 def simplify_geojson_geometries(input_file, output_file, tolerance):
     # check input exists
     if not os.path.exists(input_file):
@@ -22,7 +27,7 @@ def simplify_geojson_geometries(input_file, output_file, tolerance):
     features = []
     for feature in tqdm(gj["features"]):
         geom = shapely.geometry.shape(feature["geometry"])
-        simplified_polygon = geom.simplify(tolerance, preserve_topology=True)
+        simplified_polygon = simplify_geometry(geom, tolerance)
         feature["geometry"] = simplified_polygon
         features.append(feature)
 
