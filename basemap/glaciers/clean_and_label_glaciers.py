@@ -12,8 +12,8 @@ from tqdm import tqdm
 current_dir = os.path.dirname(__file__)
 sys.path.append(os.path.join(current_dir, "..", "..", "utils"))
 
-from polygons_to_weighted_medial_axes import weighted_medial_axes_from_geojson
-from simplify import simplify_geojson_geometries
+from polygons_to_weighted_medial_axes import get_weighted_medial_axis
+from simplify import simplify_geometry
 
 
 @click.command()
@@ -42,12 +42,18 @@ from simplify import simplify_geojson_geometries
     default=0.0001,
     help="The tolerance for simplification of medial axes.",
 )
+@click.option(
+    "--workers",
+    default=multiprocessing.cpu_count(),
+    help="Number of workers to use",
+)
 def cli(
     input_file,
     cleaned_glaciers_output_file,
     labels_output_file,
     pre_simplify_tolerance,
     medial_axes_tolerance,
+    workers,
 ):
     print("Combining glaciers with the same name...")
     # load the input geojson
@@ -129,7 +135,7 @@ def cli(
                 )
                 break
 
-    new_polygons = []
+    combined_glacier_polygons = []
     for poly_id in polygons:
         poly = polygons[poly_id]["polygon"]
         properties = polygons[poly_id]["properties"]
@@ -142,37 +148,55 @@ def cli(
             if not poly.is_simple or not poly.is_valid:
                 raise Exception("Failed to make polygon simple and valid")
 
-        new_polygons.append(
-            geojson.Feature(
-                geometry=poly.__geo_interface__,
-                properties=properties,
-            )
-        )
-
-    gj["features"] = new_polygons
-
-    # save the polygons to a new geojson
-    with open(cleaned_glaciers_output_file, "w") as f:
-        geojson.dump(gj, f)
+        combined_glacier_polygons.append((poly, properties))
 
     print("Creating simplified glacier boundaries...")
-    simplify_geojson_geometries(
-        "data/temp/combined-glaciers.geojson",
-        "data/temp/simplified-glaciers.geojson",
-        pre_simplify_tolerance,
-    )
+
+    simplified_glaciers = []
+    for poly, properties in tqdm(combined_glacier_polygons):
+        simplified_polygon = simplify_geometry(poly, pre_simplify_tolerance)
+        simplified_glaciers.append((simplified_polygon, properties))
+
     print("Creating medial axes from simplified boundaries...")
-    weighted_medial_axes_from_geojson(
-        "data/temp/simplified-glaciers.geojson",
-        "data/temp/weighted-medial-axes.geojson",
-        multiprocessing.cpu_count(),
-    )
+
+    medial_axes = []
+    with multiprocessing.Pool(workers) as p:
+        for line, properties in tqdm(
+            p.imap_unordered(get_weighted_medial_axis, simplified_glaciers),
+            total=len(simplified_glaciers),
+        ):
+            if line is None:
+                continue
+            medial_axes.append((line, properties))
+
     print("Simplifying medial axes...")
-    simplify_geojson_geometries(
-        "data/temp/weighted-medial-axes.geojson",
-        labels_output_file,
-        medial_axes_tolerance,
-    )
+
+    simplified_medial_axes = []
+    for line, properties in tqdm(medial_axes):
+        simplified_line = simplify_geometry(line, medial_axes_tolerance)
+        simplified_medial_axes.append((simplified_line, properties))
+
+    # save the simplified medial axes
+    with open(labels_output_file, "w") as f:
+        gj = geojson.FeatureCollection(
+            [
+                geojson.Feature(geometry=line, properties=properties)
+                for line, properties in simplified_medial_axes
+            ],
+            crs=gj["crs"],
+        )
+        geojson.dump(gj, f)
+
+    # save the combined glacier polygons
+    with open(cleaned_glaciers_output_file, "w") as f:
+        gj = geojson.FeatureCollection(
+            [
+                geojson.Feature(geometry=poly, properties=properties)
+                for poly, properties in combined_glacier_polygons
+            ],
+            crs=gj["crs"],
+        )
+        geojson.dump(gj, f)
 
 
 if __name__ == "__main__":

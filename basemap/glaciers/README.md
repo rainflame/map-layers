@@ -21,10 +21,8 @@ This dataset contains multiple glacier boundaries at different timestamps, so yo
 Run this script to trim and filter the dataset:
 
 ```
-python trim_and_filter_glaciers.py --filter-year=2023 --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
+python trim_glaciers.py --filter-year=2023 --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
 ```
-
-You can also specify a custom input and output destination with `--input-file` and `--output-file`.
 
 ## Create polygon centerlines
 
@@ -48,6 +46,4 @@ You should now have the final output files:
 data/output/
     glaciers.mbtiles
     glaciers.pmtiles
-    glacier_labels.mbtiles
-    glacier_labels.pmtiles
 ```
