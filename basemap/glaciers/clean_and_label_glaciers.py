@@ -5,7 +5,10 @@ import os
 import sys
 import uuid
 
-from shapely.geometry import Polygon
+import numpy as np
+
+from scipy.interpolate import splprep, splev
+from shapely.geometry import Polygon, LineString
 from rtree import index
 from tqdm import tqdm
 
@@ -176,12 +179,27 @@ def cli(
         simplified_line = simplify_geometry(line, medial_axes_tolerance)
         simplified_medial_axes.append((simplified_line, properties))
 
+    print("Creating B-Splines from simplified medial axes...")
+
+    DEGREE = 3
+    smoothed_medial_axes = []
+    for line, properties in tqdm(simplified_medial_axes):
+        x, y = line.xy
+        if len(x) < DEGREE + 1:
+            # not enough points to smooth
+            continue
+        # create a B-spline representation of the line
+        tck, u = splprep([x, y], s=2, k=DEGREE)
+        new_x, new_y = splev(np.linspace(0, 1, 100), tck)
+        smoothed_line = LineString([(x, y) for x, y in zip(new_x, new_y)])
+        smoothed_medial_axes.append((smoothed_line, properties))
+
     # save the simplified medial axes
     with open(labels_output_file, "w") as f:
         gj = geojson.FeatureCollection(
             [
                 geojson.Feature(geometry=line, properties=properties)
-                for line, properties in simplified_medial_axes
+                for line, properties in smoothed_medial_axes
             ],
             crs=gj["crs"],
         )

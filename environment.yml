@@ -17,6 +17,7 @@ dependencies:
   - pyproj
   - scikit-geometry
   - rtree
+  - scipy
   - pip
   - pip:
       - rio-rgbify
