@@ -1,6 +1,9 @@
+#!/bin/bash
+
 layers=(
-    "elevation/data/output/contours.mbtiles"
-    "glaciers/data/output/glaciers.mbtiles"
+    "elevation/data/output/contours.pmtiles"
+    "glaciers/data/output/glaciers.pmtiles"
+    "landcover/data/output/landcover.pmtiles"
 )
 
 # filter out any files in the layers array that don't exist
@@ -12,10 +15,6 @@ printf "\n"
 
 echo -e "\nCombining layers...\n"
 
-tile-join -o data/output/basemap.mbtiles ${layers[@]} --force
+tile-join -o data/output/basemap.pmtiles ${layers[@]} --force
 
-echo -e "\nConverting to pmtiles format...\n"
-
-pmtiles convert data/output/basemap.mbtiles data/output/basemap.pmtiles
-
-echo -e "\nDone, created: \ndata/output/basemap.mbtiles\ndata/output/basemap.pmtiles\n"
+echo -e "\n\nDone, created: \ndata/output/basemap.pmtiles\n"

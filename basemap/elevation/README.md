@@ -102,10 +102,8 @@ Contours are created by iterating over the DEM source files and running `gdal_co
 Run the python script to generate geojson contours for each DEM tif tile in `data/sources/`:
 
 ```
-python create_contours.py --workers=8
+python create_contours.py
 ```
-
-Use `--workers` to specify the number of workers you want to spawn to run the processing in parallel.
 
 ### Tile contours and clean up
 
