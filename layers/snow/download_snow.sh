@@ -1,13 +1,45 @@
 # create a temp dir 
+mkdir -p /tmp/snow/
+
+# Get the current year, month, and day
+current_date=$(date +'%Y%m%d')
+year=${current_date:0:4}
+month=${current_date:4:2}
+day=${current_date:6:2}
+month_abbreviation=$(date +'%b')
 
 # download from https://noaadata.apps.nsidc.org/NOAA/G02158/masked/2023/11_Nov/SNODAS_20231108.tar
-# https://noaadata.apps.nsidc.org/NOAA/G02158/masked/[year]/[day]_[month_abbreviation]/SNODAS_[yearmonthday].tar
+wget -P /tmp/snow/ -O data.tar "https://noaadata.apps.nsidc.org/NOAA/G02158/masked/${year}]/${day}_${month_abbreviation}/SNODAS_${year}${month}${day}].tar"
+tar -xvf /tmp/snow/data.tar -C /tmp/snow/
+gunzip /tmp/snow/*.gz
 
-# untar the directory
+# see https://nsidc.org/sites/default/files/g02158-v001-userguide_2_1.pdf for naming convention
+# region: US
+# model: SSMV
+# type: snow model output
+# product: snow depth
+# data: integral through the snowpack
+# time: 1 hour snapshot 
+# us_ssmv11036tS__T0001TTNATSyyyymmddhhIP00Z.xxx.gz
 
-# enter the directory 
+# 2023 11 09 05 H P001
+files=$(ls us_ssmv11036tS__T0001TTNATS*.gz)
 
-# unzip *.gz
+if [ -z "$files" ]; then
+    echo "No snowcover file with correct type found"
+    exit 1
+fi
+
+# select the last file (latest)
+if [ -n "$files" ]; then
+    last_file=$(echo $files | awk '{print $NF}')
+    echo $last_file
+fi
+
+
+
+
+
 
 # find the last file (TODO: figure out the naming convention)
 
