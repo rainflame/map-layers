@@ -18,6 +18,7 @@ dependencies:
   - scikit-geometry
   - rtree
   - scipy
+  - rclone
   - pip
   - pip:
       - rio-rgbify
