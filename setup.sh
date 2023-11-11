@@ -1,8 +1,7 @@
 #!/bin/bash
+# this script sets up a clean ubuntu machine with the necessary dependencies to run any of the pipelines in this repo
 
-# this script sets up a clean ubunut machine with the necessary dependencies to run any of the pipelines in this repo
 echo -e "\nCreating swapfile...\n"
-
 # create a swapfile. here we use 4GB but adjust as necessary
 fallocate -l 4G /swapfile
 chmod 600 /swapfile
@@ -31,8 +30,10 @@ echo -e "\nInstalling miniforge...\n"
 wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-$(uname)-$(uname -m).sh"
 bash Miniforge3.sh -b -p "${HOME}/conda"
 rm Miniforge3.sh
-source "${HOME}/conda/etc/profile.d/conda.sh"
-source "${HOME}/conda/etc/profile.d/mamba.sh"
+
+echo -e 'source "${HOME}/conda/etc/profile.d/conda.sh"' >> ~/.bashrc 
+echo -e 'source "${HOME}/conda/etc/profile.d/mamba.sh"' >> ~/.bashrc 
+source ~/.bashrc
 
 echo -e "\nCreating environment...\n"
 
@@ -40,9 +41,8 @@ mamba env create -f environment.yml
 
 echo -e "\nActivating environment...\n"
 
-source "${HOME}/conda/etc/profile.d/conda.sh"
-source "${HOME}/conda/etc/profile.d/mamba.sh"
-source ~/.bashrc
-
 mamba activate pika-datasets
 
+echo -e "\nSetting up rclone config...\n"
+
+cp rclone.conf "/${USER}/.config/rclone/rclone.conf"
