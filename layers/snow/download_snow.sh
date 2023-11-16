@@ -1,4 +1,4 @@
-SOURCES=data/temp
+SOURCES=data/sources
 TEMP=data/temp
 
 # Get the current year, month, and day
