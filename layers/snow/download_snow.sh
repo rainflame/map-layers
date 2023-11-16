@@ -1,5 +1,5 @@
-# create a temp dir 
-mkdir -p /tmp/snow/
+SOURCES=data/temp
+TEMP=data/temp
 
 # Get the current year, month, and day
 current_date=$(date +'%Y%m%d')
@@ -8,10 +8,10 @@ month=${current_date:4:2}
 day=${current_date:6:2}
 month_abbreviation=$(date +'%b')
 
-# download from https://noaadata.apps.nsidc.org/NOAA/G02158/masked/2023/11_Nov/SNODAS_20231108.tar
-wget -P /tmp/snow/ -O data.tar "https://noaadata.apps.nsidc.org/NOAA/G02158/masked/${year}]/${day}_${month_abbreviation}/SNODAS_${year}${month}${day}].tar"
-tar -xvf /tmp/snow/data.tar -C /tmp/snow/
-gunzip /tmp/snow/*.gz
+# download from https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/2023/11_Nov/SNODAS_unmasked_20231108.tar
+curl -o $SOURCES/data.tar "https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/${year}/${month}_${month_abbreviation}/SNODAS_unmasked_${year}${month}${day}.tar" --progress-bar
+tar -xvf $SOURCES/data.tar -C $SOURCES/
+gunzip $SOURCES/*.gz
 
 # see https://nsidc.org/sites/default/files/g02158-v001-userguide_2_1.pdf for naming convention
 # region: US
@@ -20,54 +20,47 @@ gunzip /tmp/snow/*.gz
 # product: snow depth
 # data: integral through the snowpack
 # time: 1 hour snapshot 
-# us_ssmv11036tS__T0001TTNATSyyyymmddhhIP00Z.xxx.gz
-
-# 2023 11 09 05 H P001
-files=$(ls us_ssmv11036tS__T0001TTNATS*.gz)
+# us_ssmv11036tS__T0001TTNATSyyyymmddhhIP00Z.dat
+files=$(ls $SOURCES/zz_ssmv11036tS__T0001TTNATS*.dat)
 
 if [ -z "$files" ]; then
     echo "No snowcover file with correct type found"
     exit 1
 fi
 
-# select the last file (latest)
+# select the last file (latest if there are multiple)
 if [ -n "$files" ]; then
     last_file=$(echo $files | awk '{print $NF}')
     echo $last_file
 fi
 
+filename=$(echo $last_file | cut -f 1 -d '.')
 
+# get the date and time from the yyyymmddhhHP001 portion of the filename
+parsed_year="${filename: -15:4}"
+parsed_month="${filename: -11:2}"
+parsed_day="${filename: -9:2}"
+parsed_hour="${filename: -7:2}"
 
+# save parsed date and time to a json file 
+echo "{\"year\": \"$parsed_year\", \"month\": \"$parsed_month\", \"day\": \"$parsed_day\", \"hour\": \"$parsed_hour\"}" > $TEMP/snow_meta.json
 
-
-
-# find the last file (TODO: figure out the naming convention)
-
-# create a new file with the same filename.hdr containing: 
-ENVI
-samples = 6935
-lines = 3351
+# create filename.hdr file
+# https://nsidc.org/data/user-resources/help-center/how-do-i-convert-snodas-binary-files-geotiff-or-netcdf
+echo "ENVI
+samples = 8192
+lines = 4096
 bands = 1
 header offset = 0
 file type = ENVI Standard
 data type = 2
 interleave = bsq
 byte order = 1
+" > $filename.hdr
 
 # convert to GEOtiff
-gdal_translate -of GTiff -a_srs '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' -a_nodata -9999 -a_ullr -124.73375000000000 52.87458333333333 -66.94208333333333 24.94958333333333 <input.dat> <output.tif>
+gdal_translate -of GTiff -a_srs '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' -a_nodata -9999 -a_ullr -130.51666666666667 58.23333333333333 -62.25000000000000 24.10000000000000 $last_file $TEMP/snow_conus.tif
 
-# mask the geotiff to the bounding box
-
-# create contours (step -10?) based on the pixel values (0 -> -9999)
-
-# run the vectorization aglorithm on the raster 
-
-# tile the vectorized contours to pmtiles 
-
-# upload to r2 
-
-# delete the temp dir 
 
 
 
