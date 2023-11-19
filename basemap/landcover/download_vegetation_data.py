@@ -36,9 +36,11 @@ def cli(bbox):
     host = "https://lfps.usgs.gov"
     dataset = "230EVT"  # 2022 existing vegetation type
     bbox = bbox.replace(",", " ")
-    url = f"{host}/arcgis/rest/services/LandfireProductService/GPServer/" \
-        "LandfireProductService/submitJob?Layer_List={dataset}" \
-        "&Area_Of_Interest={bbox}"
+    url = f"{host}/arcgis/rest/services/LandfireProductService/GPServer/" + \
+        f"LandfireProductService/submitJob?Layer_List={dataset}" + \
+        f"&Area_Of_Interest={bbox}"
+    
+    print(url)
 
     job_url = None
     try:
