@@ -10,7 +10,7 @@ month=${current_date:4:2}
 day=${current_date:6:2}
 month_abbreviation=$(date +'%b')
 
-echo -e "\nDownloading snow data for ${current_date}...\n"
+echo -e "\nDownloading snow data for $(date +'%Y-%m-%d')...\n"
 
 # download from https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/2023/11_Nov/SNODAS_unmasked_20231108.tar
 curl -o $SOURCES/data.tar "https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/${year}/${month}_${month_abbreviation}/SNODAS_unmasked_${year}${month}${day}.tar" --progress-bar
@@ -37,11 +37,11 @@ fi
 
 # select the last file (latest if there are multiple)
 if [ -n "$files" ]; then
-    last_file=$(echo $files | awk '{print $NF}')
-    echo $last_file
+    last_file=$(echo "$files" | awk '{print $NF}')
+    echo "$last_file"
 fi
 
-filename=$(echo $last_file | cut -f 1 -d '.')
+filename=$(echo "$last_file" | cut -f 1 -d '.')
 
 # get the date and time from the yyyymmddhhHP001 portion of the filename
 parsed_year="${filename: -15:4}"
@@ -63,11 +63,23 @@ file type = ENVI Standard
 data type = 2
 interleave = bsq
 byte order = 1
-" > $filename.hdr
+" > "$filename".hdr
 
 echo -e "\nConverting to GeoTIFF format...\n"
 
 # convert to GEOtiff
-gdal_translate -of GTiff -a_srs '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' -a_nodata -9999 -a_ullr -130.51666666666667 58.23333333333333 -62.25000000000000 24.10000000000000 $last_file $TEMP/snow-conus.tif
+gdal_translate -of GTiff -a_srs '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' \
+            -a_nodata -9999 -a_ullr \
+            -130.51666666666667 \
+            58.23333333333333 \
+            -62.25000000000000 \
+            24.10000000000000 \
+            "$last_file" $SOURCES/snow-conus.tif
+
+# clean up the sources directory
+rm $SOURCES/*.dat
+rm $SOURCES/*.txt
+rm $SOURCES/*.tar
+rm $SOURCES/*.hdr
 
 echo -e "\nDone!\n"
