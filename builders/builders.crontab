@@ -1,0 +1,1 @@
+1 * * * * $HOME/pika-datasets/builders/build_snow.sh >> /var/log/build_snow.log 2>&1
