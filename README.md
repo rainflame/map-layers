@@ -1,13 +1,17 @@
 # Pika datasets
 
-The source code to generate the datasets and maps available on [pikamaps.com](https://pikamaps.com).
+The source code to generate the map layers available on [pikamaps.com](https://pikamaps.com).
 
-## Building datasets
+There's two primary components to Pika Maps: the basemap, and the dynamic layers. The basemap is built from a variety of public datasets provided by U.S. federal agencies and openstreetmap. It's built once and updated fairly infrequently. You can build the basemap from scratch by building the components listed in [/basemap](/basemap/), then combining them into a single `pmtiles` archive. This archive can then be rendered using [maplibre-gl](https://github.com/maplibre/maplibre-gl-js) or any other map rendering engine that supports `pmtiles` archives.
 
-To build the datasets, activate the conda environment:
+The dynamic layers are updated more often, at least daily depending on the layer. Their structure mirrors that of the basemap, the only difference is that once built each layer is kept as its own `pmtiles` archive and served individually. You can find the code to build these layers in [/layers](/layers/) and the cronjobs that periodically rebuild the layers in [/builders/](/builders/).
+
+## Building map layers
+
+To run any of the layer build pipelines, first activate make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) and create the environment:
 
 ```
-conda env create -f environment.yml
+mamba env create -f environment.yml
 ```
 
 If you're going to build the vector basemap tiles, you'll also need Java 17+ installed.
@@ -18,7 +22,7 @@ Java installation on Linux:
 sudo apt install openjdk-19-jre-headless
 ```
 
-Each subdirectory has instructions for building each part of the dataset. See [basemap](/basemap/) for instructions on building the map tiles from OpenStreetMap, font files, and elevation data for hillshading. See [layers](/layers/) for additional layers that can be visualized on the basemap.
+Each [basemap](/basemap/) and [layers](/layers/) subdirectory has instructions for building each part of the dataset.
 
 ## Deploying datasets
 
