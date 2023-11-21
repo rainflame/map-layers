@@ -1,7 +1,7 @@
 #!/bin/bash
 
 SOURCES=data/sources
-TEMP=data/temp
+OUTPUT=data/output
 
 # Get the current year, month, and day
 current_date=$(date +'%Y%m%d')
@@ -50,7 +50,7 @@ parsed_day="${filename: -9:2}"
 parsed_hour="${filename: -7:2}"
 
 # save parsed date and time to a json file 
-echo "{\"year\": \"$parsed_year\", \"month\": \"$parsed_month\", \"day\": \"$parsed_day\", \"hour\": \"$parsed_hour\"}" > $TEMP/snow-meta.json
+echo "{\"year\": \"$parsed_year\", \"month\": \"$parsed_month\", \"day\": \"$parsed_day\", \"hour\": \"$parsed_hour\"}" > $OUTPUT/snow-meta.json
 
 # create filename.hdr file
 # https://nsidc.org/data/user-resources/help-center/how-do-i-convert-snodas-binary-files-geotiff-or-netcdf
