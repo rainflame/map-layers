@@ -1,3 +1,5 @@
+#!/bin/bash
+
 SOURCES=data/sources
 TEMP=data/temp
 
@@ -8,8 +10,13 @@ month=${current_date:4:2}
 day=${current_date:6:2}
 month_abbreviation=$(date +'%b')
 
+echo -e "\nDownloading snow data for ${current_date}...\n"
+
 # download from https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/2023/11_Nov/SNODAS_unmasked_20231108.tar
 curl -o $SOURCES/data.tar "https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/${year}/${month}_${month_abbreviation}/SNODAS_unmasked_${year}${month}${day}.tar" --progress-bar
+
+echo -e "\nExtracting...\n"
+
 tar -xvf $SOURCES/data.tar -C $SOURCES/
 gunzip $SOURCES/*.gz
 
@@ -43,7 +50,7 @@ parsed_day="${filename: -9:2}"
 parsed_hour="${filename: -7:2}"
 
 # save parsed date and time to a json file 
-echo "{\"year\": \"$parsed_year\", \"month\": \"$parsed_month\", \"day\": \"$parsed_day\", \"hour\": \"$parsed_hour\"}" > $TEMP/snow_meta.json
+echo "{\"year\": \"$parsed_year\", \"month\": \"$parsed_month\", \"day\": \"$parsed_day\", \"hour\": \"$parsed_hour\"}" > $TEMP/snow-meta.json
 
 # create filename.hdr file
 # https://nsidc.org/data/user-resources/help-center/how-do-i-convert-snodas-binary-files-geotiff-or-netcdf
@@ -58,10 +65,9 @@ interleave = bsq
 byte order = 1
 " > $filename.hdr
 
+echo -e "\nConverting to GeoTIFF format...\n"
+
 # convert to GEOtiff
-gdal_translate -of GTiff -a_srs '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' -a_nodata -9999 -a_ullr -130.51666666666667 58.23333333333333 -62.25000000000000 24.10000000000000 $last_file $TEMP/snow_conus.tif
+gdal_translate -of GTiff -a_srs '+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs' -a_nodata -9999 -a_ullr -130.51666666666667 58.23333333333333 -62.25000000000000 24.10000000000000 $last_file $TEMP/snow-conus.tif
 
-
-
-
-
+echo -e "\nDone!\n"

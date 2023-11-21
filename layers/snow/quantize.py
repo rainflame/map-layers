@@ -7,12 +7,12 @@ from tqdm import tqdm
 @click.option(
     "--input-file",
     help="The input geotiff",
-    default="data/temp/snow_conus.tif",
+    default="data/temp/snow-conus.tif",
 )
 @click.option(
     "--output-file",
     help="The output geotiff",
-    default="data/temp/quantized.tif",
+    default="data/temp/snow-quantized.tif",
 )
 @click.option(
     "--bin-size",
@@ -70,6 +70,8 @@ def cli(input_file, output_file, bin_size, bbox):
                 out_data[i,j] = bin_value
 
         meta = src.meta.copy()
+        out_data[out_data == src.meta['nodata']] = 0
+        meta['nodata'] = 0
         # set the meta based on new bounding box 
         if bbox:
             meta['height'] = out_data.shape[0]
