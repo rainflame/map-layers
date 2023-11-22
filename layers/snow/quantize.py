@@ -7,7 +7,7 @@ from tqdm import tqdm
 @click.option(
     "--input-file",
     help="The input geotiff",
-    default="data/temp/snow-conus.tif",
+    default="data/sources/snow-conus.tif",
 )
 @click.option(
     "--output-file",
