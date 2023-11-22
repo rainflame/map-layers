@@ -34,9 +34,10 @@ wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/
 bash Miniforge3.sh -b -p "${HOME}/conda"
 rm Miniforge3.sh
 
-echo -e 'source "${HOME}/conda/etc/profile.d/conda.sh"' >> "/${USER}/.bashrc"
-echo -e 'source "${HOME}/conda/etc/profile.d/mamba.sh"' >> "/${USER}/.bashrc"
-source "/${USER}/.bashrc"
+# create the bash profile
+echo -e 'source "${HOME}/conda/etc/profile.d/conda.sh"' >> "/${USER}/.bash_profile"
+echo -e 'source "${HOME}/conda/etc/profile.d/conda.sh"' >> "/${USER}/.bash_profile"
+source "/${USER}/.bash_profile"
 
 echo "Creating conda environment..."
 
