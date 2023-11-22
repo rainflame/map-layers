@@ -27,13 +27,17 @@ Then follow the instructions below to build any components of the basemap or dyn
 
 Some layers are extremely memory intensive to build, and may benefit from being run on a multi-core server with 128GB+ of memory.
 
-To quickly set up a fresh Ubuntu machine to run any of the build pipelines, you can install all the required dependencies by running:
+To quickly set up a fresh Ubuntu machine to run any of the build pipelines, you can install all the required dependencies with a convenience setup script.
+
+If you're going to be deploying files with `rclone` from this machine (described in the [deploying](#deploying) section below), initialize the rclone config file `rclone.conf` in this repo with the necessary secret keys.
+
+Then, run:
 
 ```
 ./setup.sh
 ```
 
-This script will create a swapfile, download mamba, create the environment, and install rclone.
+This script will create an initial swapfile, download mamba, create the environment, and install rclone.
 
 You may want to increase the size of the swapfile if the region you're creating a layer over is very large. You can do something like this, changing the swapfile size as necessary:
 
@@ -43,7 +47,7 @@ fallocate -l 56G /swapfile
 swapon /swapfile
 ```
 
-## Setting up builders
+## Setting up build cronjobs
 
 All of the dynamic layers are rebuilt periodically. We use `cron` to schedule when they're built. Each build script will fetch fresh data, build the layer tiles, and redeploy the `pmtiles` archive.
 
