@@ -17,7 +17,8 @@ else
     echo "Build regions not found: $BASE_DIR/builders/regions.txt"
 fi
 
-# assumes we've already set up mamba and created the conda environment
+# assumes we've already set up conda/mamba and created the conda environment
+source "${HOME}/conda/etc/profile.d/conda.sh"
 conda activate pika-datasets
 
 cd "$BASE_DIR"/layers/snow || exit 1
@@ -34,13 +35,11 @@ for ((i=0; i<${#regions[@]}; i+=2)); do
 
     echo "Processing region: ${region_name}..."
     # snow processing pipeline taken from https://github.com/rainflame/pika-datasets/tree/master/layers/snow
-    
-    python quantize.py --bin-size=6 --bbox="${region_bbox}" 
-    geopolygonize --input-file="data/temp/quantized.tif" --output-file="data/temp/snow-contours.shp"
+    python quantize.py --bin-size=6 --bbox="${region_bbox}" --input-file="data/sources/snow-conus.tif" --output-file="data/temp/snow-quantized.tif"
+    geopolygonize --input-file="data/temp/snow-quantized.tif" --output-file="data/temp/snow-contours.shp"
     bash tile_snow.sh
 
     echo "Uploading dataset..."
-
     # upload the output to this region's dir on r2
     rclone copy data/output/snow-meta.json r2:mapmeta/"${region_name}"/ --progress
     rclone copy data/output/snow.pmtiles r2:mapserve/"${region_name}"/ --progress

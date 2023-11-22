@@ -20,7 +20,7 @@ This script will download the latest snowcover data and transform it into GeoTIF
 ./download_snow.sh
 ```
 
-When complete you should have the latest snowcover data at `data/temp/snow-conus.tif` and metadata at `data/temp/snow-meta.json`.
+When complete you should have the latest snowcover data at `data/sources/snow-conus.tif` and metadata at `data/output/snow-meta.json`.
 
 ## Quantize
 
@@ -39,7 +39,7 @@ Now you should have the quantized version of the snow raster at `data/temp/snow-
 Now we can convert the quantized raster into polygons with [geopolygonize](https://github.com/rainflame/geopolygonize/):
 
 ```
-geopolygonize --input-file="data/temp/quantized.tif" --output-file="data/temp/snow-contours.shp"
+geopolygonize --input-file="data/temp/snow-quantized.tif" --output-file="data/temp/snow-contours.shp"
 ```
 
 ## Tile
