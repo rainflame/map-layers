@@ -1,5 +1,3 @@
-# Layer builders
+# Build schedules
 
-These scripts build the dynamic layers found in [/layers](/layers/). They're run as cronjobs on schedules that vary based on the availability of fresh data.
-
-Each script will fetch the latest data, build the layer tiles, and upload it to Cloudflare R2.
+- Snow: once a day at 14:20. The daily SNODAS dataset is posted at either 13:15 or 14:15.

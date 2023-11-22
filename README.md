@@ -53,6 +53,12 @@ The build scripts and their associated cron schedules live in the [builders/](/b
 crontab builders.crontab
 ```
 
+Then restart the cron service:
+
+```
+sudo systemctl restart cron
+```
+
 Logs from the builders will get saved to `/var/log/build_[Layer Name].log`.
 
 ## Deploying
