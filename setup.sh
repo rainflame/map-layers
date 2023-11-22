@@ -34,9 +34,9 @@ wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/
 bash Miniforge3.sh -b -p "${HOME}/conda"
 rm Miniforge3.sh
 
-echo -e 'source "${HOME}/conda/etc/profile.d/conda.sh"' >> ~/.bashrc 
-echo -e 'source "${HOME}/conda/etc/profile.d/mamba.sh"' >> ~/.bashrc 
-source "${USER}/.bashrc"
+echo -e 'source "${HOME}/conda/etc/profile.d/conda.sh"' >> "/${USER}/.bashrc"
+echo -e 'source "${HOME}/conda/etc/profile.d/mamba.sh"' >> "/${USER}/.bashrc"
+source "/${USER}/.bashrc"
 
 echo "Creating conda environment..."
 
@@ -46,6 +46,7 @@ echo "Installing rclone..."
 
 sudo -v ; curl https://rclone.org/install.sh | sudo bash
 
+mkdir -p "/${USER}/.config/rclone/"
 cp rclone.conf "/${USER}/.config/rclone/rclone.conf"
 
 echo "Done!"
