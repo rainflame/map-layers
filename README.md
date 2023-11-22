@@ -2,35 +2,76 @@
 
 The source code to generate the map layers available on [pikamaps.com](https://pikamaps.com).
 
-There's two primary components to Pika Maps: the basemap, and the dynamic layers. The basemap is built from a variety of public datasets provided by U.S. federal agencies and openstreetmap. It's built once and updated fairly infrequently. You can build the basemap from scratch by building the components listed in [/basemap](/basemap/), then combining them into a single `pmtiles` archive. This archive can then be rendered using [maplibre-gl](https://github.com/maplibre/maplibre-gl-js) or any other map rendering engine that supports `pmtiles` archives.
+There's two primary components to Pika Maps: the basemap, and the dynamic layers. The basemap is built from a variety of public datasets provided by U.S. federal agencies and openstreetmap. It's built once and updated fairly infrequently. You can build the basemap from scratch by building the components listed in [basemap/](/basemap/), then combining them into a single [protomaps](https://protomaps.com/) `pmtiles` archive. This archive can then be rendered using [maplibre-gl](https://github.com/maplibre/maplibre-gl-js) or any other map rendering engine that supports `pmtiles` archives.
 
-The dynamic layers are updated more often, at least daily depending on the layer. Their structure mirrors that of the basemap, the only difference is that once built each layer is kept as its own `pmtiles` archive and served individually. You can find the code to build these layers in [/layers](/layers/) and the cronjobs that periodically rebuild the layers in [/builders/](/builders/).
+The dynamic layers are updated more often, at least daily depending on the layer. Their structure mirrors that of the basemap, the only difference is that once built each layer is kept as its own `pmtiles` archive and served individually. You can find the code to build these layers in [layers/](/layers/) and the cronjobs that periodically rebuild the layers in [builders/](/builders/).
 
-## Building map layers
+## Building
 
-To run any of the layer build pipelines, first activate make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) and create the environment:
+To run any of the layer build pipelines, first make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) and create the environment:
 
 ```
 mamba env create -f environment.yml
 ```
 
-If you're going to build the vector basemap tiles, you'll also need Java 17+ installed.
+Then follow the instructions below to build any components of the basemap or dynamic layers:
 
-Java installation on Linux:
+- Basemap
+  - [Elevation](/basemap/elevation/) (hillshading + contours)
+  - [Glaciers](/basemap/glaciers/) (highest-resolution glacier polygons)
+  - [Landcover](/basemap/landcover/) (polygons for 1000+ landcover classes)
+- Layers
+  - [Snow](/layers/snow/) (daily snowpack depth polygons)
+
+### Building remotely
+
+Some layers are extremely memory intensive to build, and may benefit from being run on a multi-core server with 128GB+ of memory.
+
+To quickly set up a fresh Ubuntu machine to run any of the build pipelines, you can install all the required dependencies with a convenience setup script.
+
+If you're going to be deploying files with `rclone` from this machine (described in the [deploying](#deploying) section below), initialize the rclone config file `rclone.conf` in this repo with the necessary secret keys.
+
+Then, run:
 
 ```
-sudo apt install openjdk-19-jre-headless
+./setup.sh
 ```
 
-Each [basemap](/basemap/) and [layers](/layers/) subdirectory has instructions for building each part of the dataset.
+This script will create an initial swapfile, download mamba, create the environment, and install rclone.
 
-## Deploying datasets
+You may want to increase the size of the swapfile if the region you're creating a layer over is very large. You can do something like this, changing the swapfile size as necessary:
 
-Each dataset is a [protomaps](https://protomaps.com/) `.pmtiles` file. These files are stored on Cloudflare R2 and served through Cloudflare Workers functions. The [Pika Maps frontend](https://github.com/rainflame/pika-maps) is built with [Maplibre GL JS](https://maplibre.org/maplibre-gl-js/docs/), which is what requests the tiles from the Cloudflare worker and renders them.
+```
+swapoff /swapfile
+fallocate -l 56G /swapfile
+swapon /swapfile
+```
 
-### Uploading datasets to R2
+## Setting up build cronjobs
 
-The `.pmtiles` files can be deployed to Cloudflare R2 using `rclone`. First, [install `rclone`](https://rclone.org/downloads/) and configure it for R2 following [these instructions](https://developers.cloudflare.com/r2/examples/rclone/).
+All of the dynamic layers are rebuilt periodically. We use `cron` to schedule when they're built. Each build script will fetch fresh data, build the layer tiles, and redeploy the `pmtiles` archive.
+
+The build scripts and their associated cron schedules live in the [builders/](/builders/) directory. They can be set up by running:
+
+```
+crontab builders.crontab
+```
+
+Then restart the cron service:
+
+```
+sudo systemctl restart cron
+```
+
+Logs from the builders will get saved to `/var/log/build_[Layer Name].log`.
+
+## Deploying
+
+The basemap and each layer is a `pmtiles` archive. For Pika Maps, files are stored on Cloudflare R2 and served through Cloudflare Workers functions.
+
+### Uploading to R2
+
+The `pmtiles` files can be deployed to Cloudflare R2 using `rclone`. First, [install `rclone`](https://rclone.org/downloads/) and configure it for R2 following [these instructions](https://developers.cloudflare.com/r2/examples/rclone/).
 
 Listing and creating buckets looks like this:
 
@@ -56,9 +97,9 @@ Other file types get uploaded to a bucket `mapmeta`. For example, uploading the 
 rclone copy basemap/glyphs/data/Barlow\ Regular pikar2:mapmeta/Barlow\ Regular/ --progress
 ```
 
-### Serving the datasets
+### Serving tiles
 
-The code for the Cloudflare workers that serve the datasets from these buckets can be found in [workers](/workers/).
+The code for the Cloudflare workers that serve the files from these buckets can be found in [workers](/workers/).
 
 #### `mapserve` worker
 
