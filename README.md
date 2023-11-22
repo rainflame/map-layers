@@ -6,7 +6,7 @@ There's two primary components to Pika Maps: the basemap, and the dynamic layers
 
 The dynamic layers are updated more often, at least daily depending on the layer. Their structure mirrors that of the basemap, the only difference is that once built each layer is kept as its own `pmtiles` archive and served individually. You can find the code to build these layers in [layers/](/layers/) and the cronjobs that periodically rebuild the layers in [builders/](/builders/).
 
-## Building map layers
+## Building
 
 To run any of the layer build pipelines, first make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) and create the environment:
 
@@ -23,7 +23,7 @@ Then follow the instructions below to build any components of the basemap or dyn
 - Layers
   - [Snow](/layers/snow/) (daily snowpack depth polygons)
 
-### Building map layers remotely
+### Building remotely
 
 Some layers are extremely memory intensive to build, and may benefit from being run on a multi-core server with 128GB+ of memory.
 
@@ -43,11 +43,23 @@ fallocate -l 56G /swapfile
 swapon /swapfile
 ```
 
-## Deploying the basemap and layers
+## Setting up builders
+
+All of the dynamic layers are rebuilt periodically. We use `cron` to schedule when they're built. Each build script will fetch fresh data, build the layer tiles, and redeploy the `pmtiles` archive.
+
+The build scripts and their associated cron schedules live in the [builders/](/builders/) directory. They can be set up by running:
+
+```
+crontab builders.crontab
+```
+
+Logs from the builders will get saved to `/var/log/build_[Layer Name].log`.
+
+## Deploying
 
 The basemap and each layer is a `pmtiles` archive. For Pika Maps, files are stored on Cloudflare R2 and served through Cloudflare Workers functions.
 
-### Uploading datasets to R2
+### Uploading to R2
 
 The `pmtiles` files can be deployed to Cloudflare R2 using `rclone`. First, [install `rclone`](https://rclone.org/downloads/) and configure it for R2 following [these instructions](https://developers.cloudflare.com/r2/examples/rclone/).
 
@@ -75,9 +87,9 @@ Other file types get uploaded to a bucket `mapmeta`. For example, uploading the 
 rclone copy basemap/glyphs/data/Barlow\ Regular pikar2:mapmeta/Barlow\ Regular/ --progress
 ```
 
-### Serving the datasets
+### Serving tiles
 
-The code for the Cloudflare workers that serve the datasets from these buckets can be found in [workers](/workers/).
+The code for the Cloudflare workers that serve the files from these buckets can be found in [workers](/workers/).
 
 #### `mapserve` worker
 
