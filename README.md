@@ -2,35 +2,27 @@
 
 The source code to generate the map layers available on [pikamaps.com](https://pikamaps.com).
 
-There's two primary components to Pika Maps: the basemap, and the dynamic layers. The basemap is built from a variety of public datasets provided by U.S. federal agencies and openstreetmap. It's built once and updated fairly infrequently. You can build the basemap from scratch by building the components listed in [/basemap](/basemap/), then combining them into a single `pmtiles` archive. This archive can then be rendered using [maplibre-gl](https://github.com/maplibre/maplibre-gl-js) or any other map rendering engine that supports `pmtiles` archives.
+There's two primary components to Pika Maps: the basemap, and the dynamic layers. The basemap is built from a variety of public datasets provided by U.S. federal agencies and openstreetmap. It's built once and updated fairly infrequently. You can build the basemap from scratch by building the components listed in [basemap/](/basemap/), then combining them into a single [protomaps](https://protomaps.com/) `pmtiles` archive. This archive can then be rendered using [maplibre-gl](https://github.com/maplibre/maplibre-gl-js) or any other map rendering engine that supports `pmtiles` archives.
 
-The dynamic layers are updated more often, at least daily depending on the layer. Their structure mirrors that of the basemap, the only difference is that once built each layer is kept as its own `pmtiles` archive and served individually. You can find the code to build these layers in [/layers](/layers/) and the cronjobs that periodically rebuild the layers in [/builders/](/builders/).
+The dynamic layers are updated more often, at least daily depending on the layer. Their structure mirrors that of the basemap, the only difference is that once built each layer is kept as its own `pmtiles` archive and served individually. You can find the code to build these layers in [layers/](/layers/) and the cronjobs that periodically rebuild the layers in [builders/](/builders/).
 
 ## Building map layers
 
-To run any of the layer build pipelines, first activate make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) and create the environment:
+To run any of the layer build pipelines, first make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) and create the environment:
 
 ```
 mamba env create -f environment.yml
 ```
 
-If you're going to build the vector basemap tiles, you'll also need Java 17+ installed.
+Each [basemap/](/basemap/) and [layers/](/layers/) subdirectory has instructions for building each part of the dataset.
 
-Java installation on Linux:
+## Deploying the basemap and layers
 
-```
-sudo apt install openjdk-19-jre-headless
-```
-
-Each [basemap](/basemap/) and [layers](/layers/) subdirectory has instructions for building each part of the dataset.
-
-## Deploying datasets
-
-Each dataset is a [protomaps](https://protomaps.com/) `.pmtiles` file. These files are stored on Cloudflare R2 and served through Cloudflare Workers functions. The [Pika Maps frontend](https://github.com/rainflame/pika-maps) is built with [Maplibre GL JS](https://maplibre.org/maplibre-gl-js/docs/), which is what requests the tiles from the Cloudflare worker and renders them.
+Each dataset is a `pmtiles` archive. These files are stored on Cloudflare R2 and served through Cloudflare Workers functions.
 
 ### Uploading datasets to R2
 
-The `.pmtiles` files can be deployed to Cloudflare R2 using `rclone`. First, [install `rclone`](https://rclone.org/downloads/) and configure it for R2 following [these instructions](https://developers.cloudflare.com/r2/examples/rclone/).
+The `pmtiles` files can be deployed to Cloudflare R2 using `rclone`. First, [install `rclone`](https://rclone.org/downloads/) and configure it for R2 following [these instructions](https://developers.cloudflare.com/r2/examples/rclone/).
 
 Listing and creating buckets looks like this:
 

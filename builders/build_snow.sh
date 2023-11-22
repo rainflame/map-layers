@@ -6,19 +6,19 @@ echo -e "--- BUILDING SNOW DATASET AT [$(date +'%Y-%m-%d %H:%M:%S')] ---\n"
 BASE_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null 2>&1 && cd .. && pwd )"
 
 # get the regions we need to build files for 
-if [ -f "$BASE_DIR/builders/build_regions.txt" ]; then
+if [ -f "$BASE_DIR/builders/regions.txt" ]; then
     regions=() 
     while IFS= read -r region
     do
         IFS=':' read -ra region_array <<< "$region"
         regions+=( "${region_array[@]}" )
-    done < "$BASE_DIR/builders/build_regions.txt"
+    done < "$BASE_DIR/builders/regions.txt"
 else
-    echo "Build regions not found: $BASE_DIR/builders/build_regions.txt"
+    echo "Build regions not found: $BASE_DIR/builders/regions.txt"
 fi
 
 # assumes we've already set up mamba and created the conda environment
-# conda activate pika-datasets
+conda activate pika-datasets
 
 cd "$BASE_DIR"/layers/snow || exit 1
 
@@ -33,12 +33,11 @@ for ((i=0; i<${#regions[@]}; i+=2)); do
     region_bbox=${regions[$i+1]}
 
     echo "Processing region: ${region_name}..."
+    # snow processing pipeline taken from https://github.com/rainflame/pika-datasets/tree/master/layers/snow
     
     python quantize.py --bin-size=6 --bbox="${region_bbox}" 
-
-    # geopolygonize --input-file="data/temp/quantized.tif" --output-file="data/temp/snow-contours.shp"
-
-    # bash tile_snow.sh
+    geopolygonize --input-file="data/temp/quantized.tif" --output-file="data/temp/snow-contours.shp"
+    bash tile_snow.sh
 
     echo "Uploading dataset..."
 
@@ -48,7 +47,7 @@ for ((i=0; i<${#regions[@]}; i+=2)); do
 
 done
 
-delete the data directories 
+# delete the data directories 
 rm -rf data/sources/ && rm -rf data/temp/ && rm -rf data/output/
 
 echo -e "--- DONE BUILDING SNOW DATASET AT [$(date +'%Y-%m-%d %H:%M:%S')] ---\n"
