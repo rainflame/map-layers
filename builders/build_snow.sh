@@ -41,9 +41,8 @@ for ((i=0; i<${#regions[@]}; i+=2)); do
 
     echo "Uploading dataset..."
     # upload the output to this region's dir on r2
-    rclone copy data/output/snow-meta.json r2:mapmeta/"${region_name}"/ --progress
-    rclone copy data/output/snow.pmtiles r2:mapserve/"${region_name}"/ --progress
-
+    rclone copy data/output/snow-meta.json r2:mapmeta/"${region_name}"/ --progress --s3-chunk-size=256M
+    rclone copy data/output/snow.pmtiles r2:mapserve/"${region_name}"/ --progress --s3-chunk-size=256M
 done
 
 # delete the data directories 
