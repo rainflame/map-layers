@@ -19,6 +19,7 @@ dependencies:
   - rtree
   - scipy
   - rclone
+  - jellyfish
   - pip
   - pip:
       - rio-rgbify

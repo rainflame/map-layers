@@ -1,8 +1,18 @@
-# Pika Wildfires
+# Wildfires
 
 Historical U.S. wildfires.
 
-## Building the dataset
+## Install
+
+Ensure you've [activated the conda environment](../../README.md#building-datasets).
+
+Create the data directories:
+
+```
+mkdir -p data/sources/ && mkdir -p data/temp/ && mkdir -p data/output/
+```
+
+## Download data
 
 There are three datasets that are combined to create the final fire perimeters layer.
 
@@ -10,66 +20,38 @@ There are three datasets that are combined to create the final fire perimeters l
 - [BLM National Fire Perimeters](https://gbp-blm-egis.hub.arcgis.com/datasets/BLM-EGIS::blm-natl-fire-perimeters-polygon/about). This dataset contains historic data up to 2020 for fires on BLM-managed lands.
 - [WFIGS Interagency Fire Perimeters](https://data-nifc.opendata.arcgis.com/datasets/nifc::wfigs-interagency-fire-perimeters/about). This is the most authoritative dataset that contains fire perimeters on all fires in the United States starting in 2021.
 
-Download shapefiles from the above links and place them in a `/data/sources/` directory in the subdirectories `/USFSPerimeters`, `/BLMPerimeters`, and `/NIFCPerimeters`. You should have a directory structure like this:
+Manually download shapefiles from the above links and place them in a `/data/sources/` directory in the subdirectories `/USFSPerimeters`, `/BLMPerimeters`, and `/NIFCPerimeters`.
+
+## Combine datasets
+
+To combine the three datasets into a single file for a given bounding box region, run:
 
 ```
-data/
-    sources/
-        USFSPerimeters/
-            *.shp
-            *.dbf
-            *.shx
-            ...
-        BLMPerimeters/
-            *.shp
-            *.dbf
-            *.shx
-            ...
-        NIFCPerimeters/
-            *.shp
-            *.dbf
-            *.shx
-            ...
+python combine_fire_datasets.py --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
 ```
 
-### Combining datasets
+## Deduplicate
 
-Install the dependencies and run the python script to combine the datasets into a single shapefile:
+The datasets contain many duplicate fires that may have slightly different names and boundaries. This script identifies high-probability duplicates and removes them. It does this by identifying duplicates where all of the following are true for a pair of given boundaries:
 
-```
-pip install -r requirements.txt
-```
+- Have intersecting bounding boxes
+- Are the same year
+- Have areas within 20% of each other
+- Have names with a [Jaro-Winkler](https://en.wikipedia.org/wiki/Jaro%E2%80%93Winkler_distance) similarity > 0.5
+- Have an intersection that is at least 80% the overall area of at least one of the boundaries
 
-Then,
-
-```
-python create_combined_fire_dataset.py
-```
-
-This will likely take over an hour to run. When complete, you should now have a combined, cleaned and deduplicated version of the dataset at `data/fires.shp`.
-
-#### Combining datasets interactively
-
-You can also run the jupyter notebook for an interactive version of the same process:
+Run the deduplication:
 
 ```
-pip install jupyter seaborn
+python deduplicate_fires.py
 ```
 
-Then,
+## Tile
+
+Now we can create a tiled version of the boundaries:
 
 ```
-jupyter notebook create_combined_fire_dataset.ipynb
+./tile_fires.sh
 ```
 
-### Tile the dataset
-
-To run the tiling script, ensure you have [GDAL](https://gdal.org/), [tippecanoe](https://github.com/mapbox/tippecanoe), and [pmtiles](https://github.com/protomaps/PMTiles) installed.
-
-Run the script to convert the shapefile to tiles stored in a `.pmtiles` file:
-
-```
-./create_fires_pmtiles.sh
-```
-
-Now you should have `data/fires.pmtiles`!
+Now you should have `data/output/wildfires.pmtiles`.
