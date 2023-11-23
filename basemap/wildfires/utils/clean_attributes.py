@@ -1,7 +1,38 @@
-import pandas as pd
+def standardize_year(attributes):
+    # convert fire year to datetime 
+    if attributes["year"] != None:
+        attributes["year"] = str(int(attributes["year"]))
 
-def standardize_causes(df):
+    return attributes
 
+def standardize_name(attributes):
+    # clean up name values
+    if attributes["name"] == None:
+        attributes["name"] = "unnamed fire"
+
+    attributes["name"] =  attributes["name"].lower()
+    attributes["name"] =  attributes["name"].replace('unnamed', 'unnamed fire')
+    attributes["name"] =  attributes["name"].replace('noname', 'unnamed fire')
+    attributes["name"] =  attributes["name"].replace('unknown', 'unnamed fire')
+    attributes["name"] =  attributes["name"].replace('missing', 'unnamed fire')
+    attributes["name"] =  attributes["name"].replace('n/a', 'unnamed fire')
+
+    return attributes
+
+
+
+def standardize_causes(attributes):
+
+    if attributes["cause2"] != None:
+        attributes["cause2"] = attributes["cause2"].lower()
+
+    if attributes["cause1"] != None:
+        attributes["cause1"] = attributes["cause1"].lower()
+
+    if attributes["cause3"] != None:
+        attributes["cause3"] = attributes["cause3"].lower()
+
+    
     # remap usfs cause codes to their corresponding causes
     usfs_cause_map = {
         '1': 'lightning',
@@ -16,11 +47,11 @@ def standardize_causes(df):
     }
 
     for num, cause in usfs_cause_map.items():
-        df.loc[df['CAUSE_2'] == num, 'CAUSE_2'] = cause
+        if attributes["cause2"] != None and num in attributes['cause2']:
+            attributes['cause2'] = cause
 
     # remap layer 2 causes to a standardized set of cases
     layer_2_cause_map = {
-        None: None,
         'campfire': 'camping',
         'equipment': 'equipment and vehicle use',
         'children': 'misuse of fire by a minor',
@@ -48,13 +79,13 @@ def standardize_causes(df):
     }
 
     for og_cause, cause in layer_2_cause_map.items():
-        df.loc[df['CAUSE_2'] == og_cause, 'CAUSE_2'] = cause
+        if attributes["cause2"] != None and og_cause in attributes['cause2']:
+            attributes['cause2'] = cause
 
     # generate layer 1 causes from layer 2 causes
     layer_1_cause_map = {
         'human': 'human',
         'natural': 'natural',
-        None: None,
         'equipment and vehicle use': 'human',
         'misuse of fire by a minor': 'human',
         'debris and open burning': 'human',
@@ -74,14 +105,7 @@ def standardize_causes(df):
         'undetermined': None
     }
 
-    def create_layer_1_value(row):
-        if pd.isnull(row['CAUSE_1']):
-            try:
-                return layer_1_cause_map[row['CAUSE_2']]
-            except KeyError as e:
-                return None
-        return row['CAUSE_1']
+    if attributes['cause1'] == None and attributes['cause2'] != None:
+        attributes['cause1'] = layer_1_cause_map[attributes['cause2']]
 
-    df['CAUSE_1'] = df.apply(create_layer_1_value, axis=1)
-
-    return df
+    return attributes
