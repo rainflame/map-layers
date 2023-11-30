@@ -6,6 +6,13 @@ ogr2ogr -f GeoJSONSeq data/temp/wildfires.geojsons data/temp/wildfires-dedupped.
 
 echo -e "\nTiling dataset...\n"
 
-tippecanoe -Z1 -z16 -P -o data/output/wildfires.pmtiles --drop-densest-as-needed -l wildfires-historic data/temp/wildfires.geojsons --force
+tippecanoe -Z1 -z16 -P -o data/output/wildfires.pmtiles \
+           --drop-densest-as-needed \
+           --simplification=5 \
+           --hilbert \
+           --maximum-tile-bytes=350000 \
+           --visvalingam \
+           -l wildfires-historic data/temp/wildfires.geojsons \
+           --force
 
 echo -e "\n\nDone, created: \ndata/output/wildfires.pmtiles\n"
