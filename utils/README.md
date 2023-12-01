@@ -43,3 +43,13 @@ python geojson_to_bounding_box.py --input-file="data/input/shape.geojson"
 ```
 
 which should print something like `-123.417224,43.022586,-118.980589,45.278084`.
+
+## Download OSM data
+
+Download openstreetmap data from the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API). Pass in the bounding box as the first argument, ensuring that the boxes' corners are in the format lat, long.
+
+```
+./download_osm.sh 43.51921441989123,-122.04976264563147,44.39466349563759,-120.94591116755655
+```
+
+This should save the data to `data/sources/extract.osm.pbf`.
