@@ -33,3 +33,13 @@ python parse_waterways.py
 ```
 
 Now you should have water and waterways files at `data/temp/water.gpkg` and `data/temp/waterways.gpkg`.
+
+## Tile
+
+Now we can create a tiled version of the water polygons and lines:
+
+```
+./tile_waterways.sh
+```
+
+Now you should have `data/output/water.pmtiles` and `data/output/waterways.pmtiles`.

@@ -2,8 +2,11 @@
 
 layers=(
     "elevation/data/output/contours.pmtiles"
-    "glaciers/data/output/glaciers.pmtiles"
-    "landcover/data/output/landcover.pmtiles"
+    # "glaciers/data/output/glaciers.pmtiles"
+    # "landcover/data/output/landcover.pmtiles"
+    "wildfires/data/output/wildfires.pmtiles"
+    "waterways/data/output/water.pmtiles"
+    "waterways/data/output/waterways.pmtiles"
 )
 
 # filter out any files in the layers array that don't exist
@@ -15,6 +18,6 @@ printf "\n"
 
 echo -e "\nCombining layers...\n"
 
-tile-join -o data/output/basemap.pmtiles ${layers[@]} --force
+tile-join -o data/output/basemap.pmtiles "${layers[@]}" --force
 
 echo -e "\n\nDone, created: \ndata/output/basemap.pmtiles\n"
