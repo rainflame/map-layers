@@ -46,10 +46,12 @@ which should print something like `-123.417224,43.022586,-118.980589,45.278084`.
 
 ## Download OSM data
 
-Download openstreetmap data from the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API). Pass in the bounding box as the first argument, ensuring that the boxes' corners are in the format lat, long.
+Download openstreetmap data from the [Overpass API](https://wiki.openstreetmap.org/wiki/Overpass_API). Pass in the bounding box as the first argument, ensuring that the boxes' corners are in the format lat, long. Pass in an [overpass query](https://osm-queries.ldodds.com/syntax-reference.html) as the second argument.
 
 ```
-./download_osm.sh 43.51921441989123,-122.04976264563147,44.39466349563759,-120.94591116755655
+./download_osm.sh \
+    "43.51921441989123,-122.04976264563147,44.39466349563759,-120.94591116755655" \
+    "(way[waterway];>;nwr[natural=water];>;)"
 ```
 
 This should save the data to `data/sources/extract.osm.pbf`.
