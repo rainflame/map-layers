@@ -28,7 +28,7 @@ if [ "$2" == "basemap" ] || [ "$3" == "basemap" ]; then
     short_uuid=$(uuidgen | tr -d '-' | cut -c 1-8)
     remote_path="$1"/basemap/"${current_date}"_"${short_uuid}".pmtiles
     echo "Deploying basemap to: $remote_path"
-    rclone copy --progress data/output/basemap.pmtiles "$remote_path"
+    rclone copyto --progress data/output/basemap.pmtiles "$remote_path"
 fi
    
 
@@ -36,7 +36,7 @@ if [ "$2" == "elevation" ] || [ "$3" == "elevation" ]; then
     short_uuid=$(uuidgen | tr -d '-' | cut -c 1-8)
     remote_path="$1"/elevation/"${current_date}"_"${short_uuid}".pmtiles
     echo "Deploying elevation to: $remote_path"
-    rclone copy --progress elevation/data/output/elevation.pmtiles "$remote_path"
+    rclone copyto --progress elevation/data/output/elevation.pmtiles "$remote_path"
 
 fi
 
