@@ -58,6 +58,10 @@ class OSMWaterwayHandler(osmium.SimpleHandler):
                             "intermittent": w.tags["intermittent"]
                             if "intermittent" in w.tags
                             else None,
+                            "man_made": w.tags["man_made"]
+                            if "man_made" in w.tags
+                            else None,
+                            "tunnel": w.tags["tunnel"] if "tunnel" in w.tags else None,
                         },
                     )
                 )
@@ -162,6 +166,8 @@ def cli(input_file, lake_output_file, river_output_file):
             "name": "str",
             "type": "str",
             "intermittent": "str",
+            "man_made": "str",
+            "tunnel": "str",
         },
     }
     with fiona.open(
@@ -176,6 +182,8 @@ def cli(input_file, lake_output_file, river_output_file):
                         "name": river[1]["name"],
                         "type": river[1]["type"],
                         "intermittent": river[1]["intermittent"],
+                        "man_made": river[1]["man_made"],
+                        "tunnel": river[1]["tunnel"],
                     },
                 }
             )
