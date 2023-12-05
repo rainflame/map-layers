@@ -1,23 +1,10 @@
 # Basemap tile generation
 
-Here we generate the basemap tiles from a variety of sources. See each subdirectory for information on how to build each part of the basemap.
+Generate the basemap tiles. See each subdirectory for instructions on how to build that layer.
 
 ## Combining tiles
 
-Once you've generated datasets, you should have a series of `.mbtiles` files like:
-
-```
-elevation/
-    data/
-        output/
-            contours.mbtiles
-glaciers/
-    data/
-        output/
-            glaciers.mbtiles
-```
-
-and so on. We're going to combine them into one single `.mbtiles` file.
+Once you've created the layers you want to include in the basemap, you're ready to combine them into a single pmtiles file.
 
 First, create the output directory:
 
@@ -31,24 +18,20 @@ To combine all layers you've generated, run:
 ./tile_layers.sh
 ```
 
-Or, to add one or two layers to an existing basemap, run:
+This will search for any built layers and create `data/output/basemap.pmtiles`.
+
+Alternatively, you can manually add one or two layers to an existing basemap. For example, to add the glaciers layer to an existing basemap file, run:
 
 ```
-tile-join -o data/output/basemap.mbtiles glaciers/data/output/glaciers.mbtiles data/output/basemap.mbtiles --force
+tile-join -o data/output/basemap.pmtiles glaciers/data/output/glaciers.pmtiles data/output/basemap.pmtiles --force
 ```
 
-The exception is `elevation/data/output/elevation.mbtiles` that is raster data and therefore must be loaded in Maplibre-gl as its own layer.
+Any of the vector layers you've generated in the basemap directory can be combined together. The only exception is `elevation/data/output/elevation.pmtiles` that is raster data and therefore must be loaded in Maplibre-gl as its own layer.
 
-Then, run `pmtiles` to generate a `.pmtiles` archive:
+## Deploy
 
-```
-pmtiles convert data/output/basemap.mbtiles data/output/basemap.pmtiles
-```
-
-You should now have the final output files:
+On R2, we save each newly generated basemap as: `{map_region}/basemap/{date}_{uuid}.pmtiles` and elevation as `{map_region}/elevation/{date}_{uuid}.pmtiles` The deploy script will upload the basemap for a particular region in this format; pass in the provider, bucket, and map region as the first argument and names of files to upload as second and optional third arguments:
 
 ```
-data/output/
-    basemap.mbtiles
-    basemap.pmtiles
+./deploy_basemap.sh r2:mapserve/central_oregon basemap elevation
 ```
