@@ -1,12 +1,12 @@
 #!/bin/bash
 
 layers=(
-    "elevation/data/output/contours.pmtiles"
+    "basemap/elevation/data/output/contours.pmtiles"
     # "glaciers/data/output/glaciers.pmtiles"
     # "landcover/data/output/landcover.pmtiles"
-    "wildfires/data/output/wildfires.pmtiles"
-    "waterways/data/output/water.pmtiles"
-    "waterways/data/output/waterways.pmtiles"
+    "basemap/wildfires/data/output/wildfires.pmtiles"
+    "basemap/waterways/data/output/water.pmtiles"
+    "basemap/waterways/data/output/waterways.pmtiles"
 )
 
 # filter out any files in the layers array that don't exist

@@ -1,3 +1,0 @@
-[submodule "workers/mapserve"]
-	path = workers/mapserve
-	url = https://github.com/protomaps/PMTiles.git
