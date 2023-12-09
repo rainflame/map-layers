@@ -30,7 +30,7 @@ The raster file represents each vegetation class as a different value in the fir
 To convert the raster to simplified polygons, run:
 
 ```
-geopolygonize --input-file="data/sources/*.tif" --output-file="data/temp/combined.shp"
+geopolygonize --input-file="data/sources/*.tif" --output-file="data/temp/combined.gpkg"
 ```
 
 ## Tile
