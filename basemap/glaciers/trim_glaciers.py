@@ -1,10 +1,7 @@
 import click
 import os
 
-from tqdm import tqdm
-from osgeo import ogr, gdal
-
-gdal.UseExceptions()
+import fiona
 
 
 @click.command()
@@ -20,7 +17,7 @@ gdal.UseExceptions()
 )
 @click.option(
     "--filter-year",
-    default="2023",
+    default=2023,
     help="The year to filter the glacier data. Any glaciers with a year greater than this will be removed.",
 )
 @click.option(
@@ -30,8 +27,8 @@ gdal.UseExceptions()
 )
 @click.option(
     "--output-file",
-    default="data/temp/glaciers.geojson",
-    help="The output geojson file.",
+    default="data/temp/glaciers.gpkg",
+    help="The output geopackage file.",
 )
 def cli(bbox, filter_names, filter_year, input_file, output_file):
     # make sure the path to the output exists, and if not make it
@@ -42,81 +39,60 @@ def cli(bbox, filter_names, filter_year, input_file, output_file):
     xmin, ymin, xmax, ymax = [float(x) for x in bbox.split(",")]
     name_blacklist = filter_names.split(",")
 
-    ds = ogr.Open(input_file)
-    if ds is None:
-        raise Exception(f"Failed to open {input_file}")
-    layer = ds.GetLayer()
+    with fiona.open(input_file) as src:
+        print("Filtering glaciers by bbox...")
+        clipped = src.filter(bbox=(xmin, ymin, xmax, ymax))
 
-    # Create a temp shapefile for the clipped features
-    driver = ogr.GetDriverByName("GeoJSON")
-    temp_ds = driver.CreateDataSource(output_file)
-    temp_layer = temp_ds.CreateLayer(
-        "glaciers", geom_type=ogr.wkbPolygon, srs=layer.GetSpatialRef()
-    )
-
-    glac_name_field = ogr.FieldDefn("glac_name", ogr.OFTString)
-    glac_name_field.SetWidth(254)
-    temp_layer.CreateField(glac_name_field)
-
-    glac_area_field = ogr.FieldDefn("area", ogr.OFTReal)
-    glac_area_field.SetWidth(254)
-    temp_layer.CreateField(glac_area_field)
-
-    anlys_time_field = ogr.FieldDefn("anlys_time", ogr.OFTString)
-    anlys_time_field.SetWidth(254)
-    temp_layer.CreateField(anlys_time_field)
-
-    # create a geometry to represent the bounding box
-    ring = ogr.Geometry(ogr.wkbLinearRing)
-    ring.AddPoint(xmin, ymin)
-    ring.AddPoint(xmin, ymax)
-    ring.AddPoint(xmax, ymax)
-    ring.AddPoint(xmax, ymin)
-    ring.AddPoint(xmin, ymin)
-    bbox = ogr.Geometry(ogr.wkbPolygon)
-    bbox.AddGeometry(ring)
-
-    print("Clipping features...")
-    for feature in tqdm(layer):
-        geom = feature.GetGeometryRef()
-        if geom.Intersects(bbox):
-            clipped_geometry = geom.Intersection(bbox)
-
-            if clipped_geometry is None:
-                continue
-            if clipped_geometry.GetGeometryName() != "POLYGON":
-                continue
-
-            if not clipped_geometry.IsValid():
-                clipped_geometry = clipped_geometry.MakeValid()
-                if clipped_geometry is None:
-                    continue
-
+        print("Filtering glaciers by year...")
+        filtered = []
+        for feature in clipped:
+            new_feat = {
+                "geometry": feature["geometry"],
+                "properties": {},
+            }
             # verify the anlys_time is greater than or equal to the filter year
             # format will be like 2023-02-16T00:00:00
-            anlys_time = feature.GetField("anlys_time")
-            if anlys_time is None:
+            if "anlys_time" in feature["properties"]:
+                anlys_time = feature["properties"]["anlys_time"]
+                anlys_year = int(anlys_time.split("-")[0])
+                if anlys_year < int(filter_year):
+                    continue
+                else:
+                    new_feat["properties"]["anlys_time"] = anlys_time
+            else:
                 continue
 
-            anlys_year = int(anlys_time.split("-")[0])
-            if anlys_year < int(filter_year):
-                continue
+            # filter out any names in the blacklist
+            if "glac_name" in feature["properties"]:
+                glac_name = feature["properties"]["glac_name"]
+                if glac_name in name_blacklist:
+                    new_feat["properties"]["glac_name"] = None
+                else:
+                    new_feat["properties"]["glac_name"] = glac_name
 
-            clipped_feature = ogr.Feature(temp_layer.GetLayerDefn())
+            # add the area
+            if "area" in feature["properties"]:
+                new_feat["properties"]["area"] = feature["properties"]["area"]
 
-            # ignore any glacier names in the name blacklist
-            glac_name = feature.GetField("glac_name")
-            if glac_name not in name_blacklist:
-                clipped_feature.SetField("glac_name", glac_name)
+            filtered.append(new_feat)
 
-            clipped_feature.SetField("anlys_time", anlys_time)
-            clipped_feature.SetField("area", feature.GetField("area"))
-
-            clipped_feature.SetGeometry(clipped_geometry)
-            temp_layer.CreateFeature(clipped_feature)
-
-    ds = None
-    temp_ds = None
+        print(f"Saving {len(filtered)} glaciers...")
+        # write the filtered features to the output file
+        with fiona.open(
+            output_file,
+            "w",
+            driver="GPKG",
+            crs=src.crs,
+            schema={
+                "geometry": "Polygon",
+                "properties": {
+                    "glac_name": "str",
+                    "area": "float",
+                    "anlys_time": "str",
+                },
+            },
+        ) as dst:
+            dst.writerecords(filtered)
 
 
 if __name__ == "__main__":

@@ -12,16 +12,21 @@ mkdir -p data/sources/ && mkdir -p data/temp/ && mkdir -p data/output/
 
 ## Download data
 
-Download the latest version of the GLIMS dataset [here](https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0272_GLIMS_v1/). Extract it to `data/sources/`.
+Download the latest version of the GLIMS dataset [here](https://daacdata.apps.nsidc.org/pub/DATASETS/nsidc0272_GLIMS_v1/). Extract it to `data/sources/`. The file we're going to use is `glims_polygons.shp`.
 
 ## Build the dataset
 
-This dataset contains multiple glacier boundaries at different timestamps, so you can see the glaciers' change over time. We're only interested in the latest here, so we'll filter out any boundaries older than a certain date.
+This dataset contains multiple glacier boundaries at different timestamps that capture the glaciers' change over time. We're only interested in the latest here, so we'll filter out any boundaries older than a certain date.
 
 Run this script to trim and filter the dataset:
 
 ```
-python trim_glaciers.py --filter-year=2023 --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
+python trim_glaciers.py \
+    --input-file="data/sources/glims_polygons.shp" \
+    --output-file="data/temp/glaciers.gpkg" \
+    --bbox="-124.566244,46.864746,-116.463504,41.991794" \
+    --filter-year=2023 \
+    --filter-names="OR,unknown"
 ```
 
 ## Create polygon centerlines
