@@ -22,7 +22,7 @@ This dataset contains multiple glacier boundaries at different timestamps that c
 python filter_glaciers.py \
     --input-file="data/sources/glims_polygons.shp" \
     --output-file="data/temp/glaciers-filtered.gpkg" \
-    --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759" \
+    --bbox="-123.417224,43.022586,-118.980589,45.278084" \
     --filter-year=2023 \
     --filter-names="OR,unknown,NONE"
 ```

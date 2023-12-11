@@ -14,13 +14,13 @@ import fiona
     default="data/temp/glaciers-filtered.gpkg",
 )
 @click.option(
-    "--cleaned-glaciers-output-file",
+    "--output-file",
     help="The output geopackage",
     default="data/output/glaciers.gpkg",
 )
 def cli(
     input_file,
-    cleaned_glaciers_output_file,
+    output_file,
 ):
     # load the input file
     with fiona.open(input_file) as src:
@@ -115,7 +115,7 @@ def cli(
         # write the combined polygons to a new geopackage
         print(f"Saving {len(combined_glacier_polygons)} glaciers...")
         with fiona.open(
-            cleaned_glaciers_output_file,
+            output_file,
             "w",
             driver="GPKG",
             crs=src.crs,
