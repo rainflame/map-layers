@@ -18,15 +18,23 @@ Download the latest version of the GLIMS dataset [here](https://daacdata.apps.ns
 
 This dataset contains multiple glacier boundaries at different timestamps that capture the glaciers' change over time. We're only interested in the latest here, so we'll filter out any boundaries older than a certain date.
 
-Run this script to trim and filter the dataset:
+```
+python filter_glaciers.py \
+    --input-file="data/sources/glims_polygons.shp" \
+    --output-file="data/temp/glaciers-filtered.gpkg" \
+    --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759" \
+    --filter-year=2023 \
+    --filter-names="OR,unknown,NONE"
+```
+
+## Combine glaciers
+
+The dataset includes glaciers that share edges. In cases that the intersecting glaciers have the same name, or one of them is named and the other is not we combine them.
 
 ```
-python trim_glaciers.py \
-    --input-file="data/sources/glims_polygons.shp" \
-    --output-file="data/temp/glaciers.gpkg" \
-    --bbox="-124.566244,46.864746,-116.463504,41.991794" \
-    --filter-year=2023 \
-    --filter-names="OR,unknown"
+python combine_glaciers.py \
+    --input-file="data/temp/glaciers-filtered.gpkg" \
+    --output-file="data/output/glaciers.gpkg"
 ```
 
 ## Create polygon centerlines

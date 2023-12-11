@@ -1,5 +1,9 @@
 import click
 import os
+import json
+
+from shapely.geometry import MultiPolygon
+from shapely import to_geojson
 
 import fiona
 
@@ -7,7 +11,7 @@ import fiona
 @click.command()
 @click.option(
     "--bbox",
-    default="-124.566244,46.864746,-116.463504,41.991794",
+    default="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759",
     help="Bounding box to trim the source shapefile.",
 )
 @click.option(
@@ -27,7 +31,7 @@ import fiona
 )
 @click.option(
     "--output-file",
-    default="data/temp/glaciers.gpkg",
+    default="data/temp/glaciers-filtered.gpkg",
     help="The output geopackage file.",
 )
 def cli(bbox, filter_names, filter_year, input_file, output_file):
@@ -68,13 +72,38 @@ def cli(bbox, filter_names, filter_year, input_file, output_file):
                 if glac_name in name_blacklist:
                     new_feat["properties"]["glac_name"] = None
                 else:
-                    new_feat["properties"]["glac_name"] = glac_name
+                    for name in name_blacklist:
+                        glac_name = glac_name.replace(name, "")
+                    new_feat["properties"]["glac_name"] = glac_name.strip()
 
             # add the area
             if "area" in feature["properties"]:
                 new_feat["properties"]["area"] = feature["properties"]["area"]
 
-            filtered.append(new_feat)
+            geom = feature["geometry"]["coordinates"]
+            poly = MultiPolygon([geom])
+
+            # make sure the polygon is valid
+            if not poly.is_valid:
+                poly = poly.buffer(0)
+                if not poly.is_valid:
+                    continue
+                else:
+                    new_feat["geometry"] = json.loads(to_geojson(poly))
+            else:
+                new_feat["geometry"] = json.loads(to_geojson(poly))
+
+            # split any multi-polygons into individual polygons
+            if new_feat["geometry"]["type"] == "MultiPolygon":
+                for poly in new_feat["geometry"]["coordinates"]:
+                    split_feat = {
+                        "geometry": {
+                            "type": "Polygon",
+                            "coordinates": poly,
+                        },
+                        "properties": new_feat["properties"],
+                    }
+                    filtered.append(split_feat)
 
         print(f"Saving {len(filtered)} glaciers...")
         # write the filtered features to the output file
@@ -92,7 +121,8 @@ def cli(bbox, filter_names, filter_year, input_file, output_file):
                 },
             },
         ) as dst:
-            dst.writerecords(filtered)
+            for feature in filtered:
+                dst.write(feature)
 
 
 if __name__ == "__main__":
