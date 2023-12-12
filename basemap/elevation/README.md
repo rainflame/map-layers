@@ -105,19 +105,40 @@ Run the python script to generate geojson contours for each DEM tif tile in `dat
 python create_contours.py
 ```
 
+This will create contours at 40, 200, and 1000 ft intervals. These will all get combined together in the final version, so we need to filter out the contours that would overlap:
+
+```
+ogr2ogr \
+    -f "GeoJSONSeq" \
+    -sql "SELECT * FROM \"contour_200\" WHERE elevation % 1000 != 0" \
+    "data/temp/200/contour_200_filtered.geojsons" \
+    "data/temp/200/contour_200.geojsons" \
+    -progress
+
+ogr2ogr \
+    -f "GeoJSONSeq" \
+    -sql "SELECT * FROM \"contour_40\" WHERE elevation % 1000 != 0" \
+    "data/temp/40/contour_40_filtered.geojsons" \
+    "data/temp/40/contour_40.geojsons" \
+    -progress
+```
+
 ### Tile contours and clean up
 
 Next, we tile the contours and define zoom ranges at which different contour intervals should be shown. 1000 ft contours are shown from z10-z18, 200 ft contours are shown from z11-z18, and 40 ft contours are shown from z12-z18.
 
 ```
-./tile_contours.sh
+./tile_contours.sh \
+    data/temp/40/contour_40_filtered.geojsons \
+    data/temp/200/contour_200_filtered.geojsons \
+    data/temp/1000/contour_1000.geojsons \
+    data/output/contours.pmtiles
 ```
 
 You should now have the final output files:
 
 ```
 data/output/
-    contours.mbtiles
     contours.pmtiles
 ```
 
