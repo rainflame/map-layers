@@ -31,8 +31,9 @@ Next, we quantize the data to produce cleaner contours. This process converts ea
 We can also provide a bounding box with `--bbox` to crop the dataset to a smaller region.
 
 ```
-python quantize.py --bin-size=12 \
-                 --bbox="-123.417224,43.022586,-118.980589,45.278084"
+python quantize.py \
+    --bin-size=12 \
+    --bbox="-123.417224,43.022586,-118.980589,45.278084"
 ```
 
 Now you should have the quantized version of the snow raster at `data/temp/snow-quantized.tif`.
@@ -44,11 +45,24 @@ Now you should have the quantized version of the snow raster at `data/temp/snow-
 Now we can convert the quantized raster into polygons with [geopolygonize](https://github.com/rainflame/geopolygonize/):
 
 ```
-geopolygonize --input-file="data/temp/snow-quantized.tif" \
-             --output-file="data/temp/snow-contours.gpkg" \
-             --simplification-pixel-window=1 \
-             --min-blob-size=12 \
-             --smoothing-iterations=1
+geopolygonize \
+    --input-file="data/temp/snow-quantized.tif" \
+    --output-file="data/temp/snow-contours.gpkg" \
+    --simplification-pixel-window=1 \
+    --min-blob-size=12 \
+    --smoothing-iterations=1
+    --label-name="depth"
+```
+
+If desired, remove the polygons representing a snow depth of zero:
+
+```
+ogr2ogr \
+    -f GPKG \
+    data/temp/snow-final.gpkg \
+    data/temp/snow-contours.gpkg \
+    -nln snow \
+    -where "depth != 0"
 ```
 
 ## Tile
@@ -56,5 +70,7 @@ geopolygonize --input-file="data/temp/snow-quantized.tif" \
 Finally, create the tiled `pmtiles` archive:
 
 ```
-./tile_snow.sh
+./tile_snow.sh \
+    data/temp/snow-final.gpkg \
+    data/output/snow.pmtiles
 ```
