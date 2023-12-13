@@ -34,16 +34,16 @@ The dataset includes glaciers that share edges. In cases that the intersecting g
 ```
 python combine_glaciers.py \
     --input-file="data/temp/glaciers-filtered.gpkg" \
-    --output-file="data/output/glaciers.gpkg"
+    --output-file="data/temp/glaciers.gpkg"
 ```
 
-## Create polygon centerlines
+<!-- ## Create polygon centerlines
 
 Next, we create the lines that we'll use to place the labels when rendering the map. We're going to approximate the [medial axis](https://en.wikipedia.org/wiki/Medial_axis) by creating a [skeleton](https://scikit-geometry.github.io/scikit-geometry/skeleton.html) for each polygon, then choosing the longest set of lines as the medial axis. This has the effect of creating a long centerline down each polygon.
 
 ```
 python clean_and_label_glaciers.py
-```
+``` -->
 
 ## Tile the dataset
 

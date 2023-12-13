@@ -16,7 +16,7 @@ import fiona
 @click.option(
     "--output-file",
     help="The output geopackage",
-    default="data/output/glaciers.gpkg",
+    default="data/temp/glaciers.gpkg",
 )
 def cli(
     input_file,
