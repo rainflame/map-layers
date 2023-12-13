@@ -22,11 +22,14 @@ mkdir -p data/sources/ && mkdir -p data/temp/ && mkdir -p data/output/
 
 ## Download the elevation data
 
-Run this script to download the elevation data for a particular bounding box from the [National Map](https://apps.nationalmap.gov/tnmaccess/#/) to `/data/sources/`:
+Run this script to download the elevation data for a particular bounding box from the [National Map](https://apps.nationalmap.gov/tnmaccess/#/):
 
 ```
-python download_elevation_data.py --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
+python download_elevation_data.py \
+    --bbox="-123.417224,43.022586,-118.980589,45.278084"
 ```
+
+You should now have a series of tif files in `/data/sources`.
 
 ## Build the TerrainRGB tiles
 
@@ -102,7 +105,24 @@ Contours are created by iterating over the DEM source files and running `gdal_co
 Run the python script to generate geojson contours for each DEM tif tile in `data/sources/`:
 
 ```
-python create_contours.py
+python create_contours.py \
+    --input-files="data/sources/*.tif"
+```
+
+This will create contours at 40, 200, and 1000 ft intervals in files `data/temp/contour_{interval}.gpkg`. These will all get combined together in the final version, so we need to filter out the contours that would overlap:
+
+```
+ogr2ogr \
+    -f "GPKG" \
+    -sql "SELECT * FROM \"elevation\" WHERE elevation % 1000 != 0" \
+    "data/temp/contour_200_filtered.gpkg" \
+    "data/temp/contour_200.gpkg" \
+
+ogr2ogr \
+    -f "GPKG" \
+    -sql "SELECT * FROM \"elevation\" WHERE elevation % 1000 != 0" \
+    "data/temp/contour_40_filtered.gpkg" \
+    "data/temp/contour_40.gpkg" \
 ```
 
 ### Tile contours and clean up
@@ -110,14 +130,17 @@ python create_contours.py
 Next, we tile the contours and define zoom ranges at which different contour intervals should be shown. 1000 ft contours are shown from z10-z18, 200 ft contours are shown from z11-z18, and 40 ft contours are shown from z12-z18.
 
 ```
-./tile_contours.sh
+./tile_contours.sh \
+    data/temp/contour_40_filtered.gpkg \
+    data/temp/contour_200_filtered.gpkg \
+    data/temp/contour_1000.gpkg \
+    data/output/contours.pmtiles
 ```
 
 You should now have the final output files:
 
 ```
 data/output/
-    contours.mbtiles
     contours.pmtiles
 ```
 

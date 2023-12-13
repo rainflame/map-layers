@@ -13,19 +13,19 @@ gdal.UseExceptions()
 
 @click.command()
 @click.option(
+    "--input-files", default="data/sources/*.tif", help="Input files to process"
+)
+@click.option(
     "--workers", default=multiprocessing.cpu_count(), help="Number of workers to use"
 )
-def cli(workers):
-    # get all .tif files in the data/sources/ directory
-    files = glob.glob("data/sources/*.tif")
+def cli(workers, input_files):
+    files = glob.glob(input_files)
 
     # create a data/temp/ directory if it doesn't exist
     try:
         if os.path.exists("data/temp"):
             shutil.rmtree("data/temp")
         os.mkdir("data/temp")
-        for i in [40, 200, 1000]:
-            os.mkdir("data/temp/{}".format(i))
     except:
         pass
 
@@ -57,9 +57,9 @@ def create_contours(interval):
     sr = osr.SpatialReference()
     sr.ImportFromEPSG(4326)
 
-    # using geojsonseq to allow reading features in parallel with tippecanoe
-    out_dataset = ogr.GetDriverByName("GeoJSONSeq").CreateDataSource(
-        f"data/temp/{interval}/contour_{interval}.geojsons",
+    # save output as GPKG
+    out_dataset = ogr.GetDriverByName("GPKG").CreateDataSource(
+        f"data/temp/contour_{interval}.gpkg",
     )
 
     contour_layer = out_dataset.CreateLayer("elevation", sr)
