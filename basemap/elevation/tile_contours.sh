@@ -8,13 +8,34 @@ if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
     exit 1
 fi
 
+# convert each input file to geojsonseq
+echo -e "\nConverting to geojsonseq...\n"
+ogr2ogr \
+    -f GeoJSONSeq \
+    data/temp/contour_40.geojsons \
+    "$1" \
+    -progress
+
+ogr2ogr \
+    -f GeoJSONSeq \
+    data/temp/contour_200.geojsons \
+    "$2" \
+    -progress
+
+ogr2ogr \
+    -f GeoJSONSeq \
+    data/temp/contour_1000.geojsons \
+    "$3" \
+    -progress
+
+
 # tile contours, creating three separate files with 40ft, 200ft, and 1000ft contours at different zoom levels
 tippecanoe \
     -Z12 \
     -z16 \
     -y elevation \
     -l contour_40 \
-    "$1" \
+    data/temp/contour_40.geojsons \
     --read-parallel \
     --drop-densest-as-needed \
     --simplification=5 \
@@ -29,7 +50,7 @@ tippecanoe \
     -z16 \
     -y elevation \
     -l contour_200 \
-    "$2" \
+    data/temp/contour_200.geojsons \
     --read-parallel \
     --drop-densest-as-needed \
     --simplification=5 \
@@ -44,7 +65,7 @@ tippecanoe \
     -z16 \
     -y elevation \
     -l contour_1000 \
-    "$3" \
+    data/temp/contour_1000.geojsons \
     --read-parallel \
     --drop-densest-as-needed \
     --simplification=5 \
