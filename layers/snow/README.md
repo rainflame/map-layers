@@ -14,10 +14,22 @@ mkdir -p data/sources/ && mkdir -p data/temp/ && mkdir -p data/output/
 
 ## Download data
 
-This script will download the latest snowcover data and transform it into GeoTIFF format:
+First, we download the snowcover data and transform it into GeoTIFF format. Pass in the date for which to download the data in the format `%Y%m%d%b`. For example, to get data for the current UTC date:
 
 ```
-./download_snow.sh
+./download_snow.sh "$(date -u +'%Y%m%d%b')"
+```
+
+Or to get yesterday's data (GNU Linux only):
+
+```
+./download_snow.sh "$(date -u --date="yesterday" +'%Y%m%d%b')"
+```
+
+MacOS/BSD version:
+
+```
+./download_snow.sh "$(date -u -v-1d +'%Y%m%d%b')"
 ```
 
 When complete you should have the latest snowcover data at `data/sources/snow-conus.tif` and metadata at `data/output/snow-meta.json`.

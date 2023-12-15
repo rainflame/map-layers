@@ -3,16 +3,18 @@
 SOURCES=data/sources
 OUTPUT=data/output
 
+current_date=$1 # assumes format '%Y%m%d%b'
+
 # Get the current year, month, and day
-current_date=$(date +'%Y%m%d')
 year=${current_date:0:4}
 month=${current_date:4:2}
 day=${current_date:6:2}
-month_abbreviation=$(date +'%b')
+month_abbreviation=${current_date:8:3}
 
-echo -e "\nDownloading snow data for $(date +'%Y-%m-%d')...\n"
+echo -e "\nDownloading snow data for $year-$month-$day...\n"
+echo "https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/${year}/${month}_${month_abbreviation}/SNODAS_unmasked_${year}${month}${day}.tar"
 
-# download from https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/2023/11_Nov/SNODAS_unmasked_20231108.tar
+# url format like https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/2023/11_Nov/SNODAS_unmasked_20231108.tar
 curl -o $SOURCES/data.tar "https://noaadata.apps.nsidc.org/NOAA/G02158/unmasked/${year}/${month}_${month_abbreviation}/SNODAS_unmasked_${year}${month}${day}.tar" --progress-bar
 
 echo -e "\nExtracting...\n"
