@@ -3,6 +3,7 @@ channels:
   - conda-forge
   - defaults
 dependencies:
+  - python>=3.10
   - click
   - tqdm
   - gdal
@@ -15,7 +16,6 @@ dependencies:
   - geojson
   - tippecanoe
   - pyproj
-  - scikit-geometry
   - rtree
   - scipy
   - rclone
