@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 SOURCES=data/sources
 OUTPUT=data/output
 
