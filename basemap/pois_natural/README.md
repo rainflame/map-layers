@@ -50,9 +50,11 @@ python associate_prominence.py \
     --to-feet
 ```
 
+Note that not all OSM peaks have corresponding prominence values. Those that aren't matched will have their prominence set to 0 and will appear at zoom 12.
+
 ## Tile
 
-Now we can create a tiled version of the peaks:
+Create a tiled version of the peaks:
 
 ```
 ./tile_pois.sh

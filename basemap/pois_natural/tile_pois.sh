@@ -24,7 +24,10 @@ echo "Tiling dataset..."
 tippecanoe \
     -Z10 \
     -z16 \
-    -l peaks_prominence_1 \
+    -r1 \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    -l peaks \
     data/temp/peaks_prominence_1.geojsons \
     --read-parallel \
     -o data/temp/peaks_prominence_1.pmtiles \
@@ -34,7 +37,10 @@ tippecanoe \
 tippecanoe \
     -Z11 \
     -z16 \
-    -l peaks_prominence_2 \
+    -r1 \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    -l peaks \
     data/temp/peaks_prominence_2.geojsons \
     --read-parallel \
     -o data/temp/peaks_prominence_2.pmtiles \
@@ -44,14 +50,15 @@ tippecanoe \
 tippecanoe \
     -Z12 \
     -z16 \
-    -l peaks_prominence_3 \
+    -r1 \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    -l peaks \
     data/temp/peaks_prominence_3.geojsons \
     --read-parallel \
     -o data/temp/peaks_prominence_3.pmtiles \
     -P \
     --force
-
-
 
 echo "Combining tiles..."
 tile-join -o data/output/peaks.pmtiles \
