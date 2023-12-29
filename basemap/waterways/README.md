@@ -18,7 +18,7 @@ Use the provided osm download utility to download data from the [Overpass API](h
 
 ```
 ./../../utils/download_osm.sh \
-    "43.51921441989123,-122.04976264563147,44.39466349563759,-120.94591116755655" \
+    "43.022586,-123.417224,45.278084,-118.980589" \
     "(way[waterway];>;nwr[natural=water];>;)"
 ```
 
