@@ -21,6 +21,7 @@ dependencies:
   - rclone
   - jellyfish
   - osmium-tool
+  - geopy
   - pip
   - pip:
       - rio-rgbify
