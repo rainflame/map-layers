@@ -87,29 +87,34 @@ Which should yield a json with the labels and their landcover class annotations 
 }
 ```
 
-Now you can choose colors based on the features' name, class or subclass. Once you have the colors, they can be rendered in Maplibre-gl with a spec like this:
+Manually choose colors based on the features' name, class or subclass. Once you've added the colors to the json, convert it to a maplibre style spec:
+
+```
+python json_colors_to_stylespec.py
+```
+
+Now you should have `data/output/stylespec.json`. This contains the `fill-color` array that defines each class' color. Take the contents and add it to your maplibre styles, which might look something like this:
 
 ```json
- {
-    id: "landcover",
-    type: "fill",
-    source: "basemap",
-    "source-layer": "landcover",
-    paint: {
-      "fill-color": [
-        "match",
-        ["get", "label"],
-        7125.0,
-        "#a8b7a5",
-        9309.0,
-        "#99b594",
-        7153.0,
-        "#c1beb0",
-        7127.0,
-        "#97a88b",
-        "#c4debf", // default for other labels
-      ],
-      "fill-opacity": 0.55,
-    },
-  },
+{
+  "id": "landcover_fill",
+  "type": "fill",
+  "source": "landcover",
+  "source-layer": "landcover",
+  "paint": {
+    "fill-color": [
+      "match",
+      ["get", "class"],
+      7125.0,
+      "#cdcfa0",
+      9309.0,
+      "#e1d081",
+      7902.0,
+      "#608a57",
+      "#bbd1b8" // add a default color
+    ],
+    "fill-opacity": 0.5,
+    "fill-antialias": false
+  }
+}
 ```
