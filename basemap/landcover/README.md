@@ -25,12 +25,18 @@ python download_vegetation_data.py \
 
 ## Convert raster data to polygons
 
-The raster file represents each vegetation class as a different value in the first band. Each pixel of the Landfire raster dataset is 30 meters, which results in very jagged looking areas when converted to polygons. We use [geopolygonize](https://github.com/rainflame/geopolygonize/) to simplify and smooth the data to get a cleaner result.
+The raster file represents each vegetation class as a different value in the first band. Each pixel of the Landfire raster dataset is 30 meters, which results in very jagged looking areas when converted to polygons. We've built [geopolygonize](https://github.com/rainflame/geopolygonize/) to simplify and smooth the data to get a cleaner result.
 
 To convert the raster to simplified polygons, run:
 
 ```
-geopolygonize --input-file="data/sources/*.tif" --output-file="data/temp/combined.gpkg"
+geopolygonize \
+  --input-file="data/sources/*.tif" \
+  --output-file="data/temp/combined.gpkg" \
+  --smoothing-iterations=2 \
+  --workers=0 \
+  --label-name="class" \
+  --tile-size=1000
 ```
 
 ## Tile
