@@ -8,9 +8,11 @@ ogr2ogr -f GeoJSONSeq data/temp/landcover.geojsons data/temp/combined.gpkg
 
 echo -e "\nTiling dataset...\n"
 
-tippecanoe -Z1 -z16 -P \
-        -o data/output/landcover.pmtiles \
-        --drop-densest-as-needed \
+tippecanoe -Z1 -z16 -P -o data/output/landcover.pmtiles \
+        --no-simplification-of-shared-nodes \
+        --hilbert \
+        --visvalingam \
+        --maximum-tile-bytes=350000 \
         -l landcover \
         data/temp/landcover.geojsons \
         --force
