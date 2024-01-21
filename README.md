@@ -8,10 +8,17 @@ The dynamic layers are updated more often, at least daily depending on the layer
 
 ## Building
 
-To run any of the layer build pipelines, first make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html) and create the environment:
+To run any of the layer build pipelines, first make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html).
+
+Create the environment:
 
 ```
 mamba env create -f environment.yml
+```
+
+Activate the environment:
+```
+mamba activate pika-datasets
 ```
 
 Then follow the instructions below to build any components of the basemap or dynamic layers:
