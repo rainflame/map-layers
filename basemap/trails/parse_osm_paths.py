@@ -25,6 +25,9 @@ class OSMPathHandler(osmium.SimpleHandler):
                     LineString(sequence),
                     {
                         "id": w.id,
+                        "ref": w.tags["ref"]
+                        if "ref" in w.tags
+                        else None,  # TODO: extract from trail name if ref is null and name has a number
                         "name": w.tags["name"]
                         if "name" in w.tags
                         else None,  # TODO: replace "Number" with #
@@ -38,11 +41,8 @@ class OSMPathHandler(osmium.SimpleHandler):
                         "horse": w.tags["horse"] or w.tags["horse"] == "designated"
                         if "horse" in w.tags
                         else None,
-                        "surface": w.tags["surface"] if "surface" in w.tags else None,
                         "dog": w.tags["dog"] if "dog" in w.tags else None,
-                        "ref": w.tags["ref"]
-                        if "ref" in w.tags
-                        else None,  # TODO: extract from trail name if ref is null and name has a number
+                        "surface": w.tags["surface"] if "surface" in w.tags else None,
                     },
                 )
             )
@@ -79,21 +79,25 @@ def cli(input_file, output_file):
         f.write(json.dumps(osm_handler.tags))
 
     print("Saving paths...")
-    schema = {
+    trail_schema = {
         "geometry": "LineString",
         "properties": {
             "id": "int",
+            "ref": "str",
             "name": "str",
+            "surface": "str",
             "bridge": "bool",
             "bicycle": "bool",
             "horse": "bool",
-            "surface": "str",
             "dog": "bool",
-            "ref": "str",
+            "snowmobile": "bool",
+            "snowshoe": "bool",
+            "xcski": "bool",
+            "groomed": "bool",
         },
     }
     with fiona.open(
-        output_file, "w", driver="GPKG", crs="EPSG:4326", schema=schema
+        output_file, "w", driver="GPKG", crs="EPSG:4326", schema=trail_schema
     ) as output:
         for path in osm_handler.paths:
             output.write(
@@ -101,13 +105,17 @@ def cli(input_file, output_file):
                     "geometry": mapping(path[0]),
                     "properties": {
                         "id": path[1]["id"],
+                        "ref": path[1]["ref"],
                         "name": path[1]["name"],
+                        "surface": path[1]["surface"],
                         "bridge": path[1]["bridge"],
                         "bicycle": path[1]["bicycle"],
                         "horse": path[1]["horse"],
-                        "surface": path[1]["surface"],
                         "dog": path[1]["dog"],
-                        "ref": path[1]["ref"],
+                        "snowmobile": None,
+                        "snowshoe": None,
+                        "xcski": None,
+                        "groomed": None,
                     },
                 }
             )
