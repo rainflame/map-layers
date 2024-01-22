@@ -45,7 +45,7 @@ def cli(input_file, output_file, bbox):
                     "ref": feature["properties"]["TRAIL_NO"],
                     "surface": feature["properties"]["TRAIL_SURFACE"],
                     "dog": None,
-                    "bicycle": None,
+                    "bicycle": feature["properties"]["BICYCLE_MANAGED"] != None,
                     "horse": None,
                     "bridge": None,
                     "snowmobile": feature["properties"]["SNOWMOBILE_MANAGED"] != None,
