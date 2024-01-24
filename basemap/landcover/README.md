@@ -23,6 +23,19 @@ python download_vegetation_data.py \
   --bbox="-123.417224,43.022586,-118.980589,45.278084"
 ```
 
+## Filter landcover data
+
+Depending on how you plan to use the polygonized landcover data, you may want to filter out certain features that will be better represented by alternative data types. For example, roads or water bodies will be more accurate from other sources such as OSM and may be filtered out of the landcover dataset.
+
+Run this script to set any specified pixel values to `no data`. The pixel values for each landcover type can be found in `data/sources/values.csv`.
+
+```
+python clean_vegetation.py \
+    --input-file="data/sources/<input>.tif" \
+    --output-file="data/temp/filtered.tif" \
+    --filter-values="7292,7299"
+```
+
 ## Convert raster data to polygons
 
 The raster file represents each vegetation class as a different value in the first band. Each pixel of the Landfire raster dataset is 30 meters, which results in very jagged looking areas when converted to polygons. We've built [geopolygonize](https://github.com/rainflame/geopolygonize/) to simplify and smooth the data to get a cleaner result.
