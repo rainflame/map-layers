@@ -171,13 +171,10 @@ def cli(bbox, usfs_input_file, blm_input_file, nifc_input_file, output_file):
             "source": "NIFC",
         }
 
-        if feature["properties"].get("STARTDATE", None) != None:
-            attributes["year"] = feature["properties"]["startdate"][:4]
+        if feature["properties"].get("STARTDATE", None) == None:
+            attributes["year"] = attributes["startdate"][:4]
 
-        if (
-            feature["properties"].get("year", None) == None
-            or feature["properties"].get("year", None) == ""
-        ):
+        if attributes.get("year", None) == None or attributes.get("year", None) == "":
             return
 
         attributes = clean_attributes.standardize_year(attributes)
