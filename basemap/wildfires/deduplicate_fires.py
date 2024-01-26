@@ -6,7 +6,7 @@ import jellyfish
 
 from rtree import index
 from tqdm import tqdm
-from shapely.geometry import shape, MultiPolygon
+from shapely.geometry import shape, MultiPolygon, mapping
 
 
 @click.command()
@@ -150,7 +150,7 @@ def cli(input_file, output_file):
 
             output.write(
                 {
-                    "geometry": polygons[poly_id]["polygon"],
+                    "geometry": mapping(polygons[poly_id]["polygon"]),
                     "properties": polygons[poly_id]["properties"],
                 }
             )
