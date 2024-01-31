@@ -55,16 +55,4 @@ Now we can create a tiled version of the boundaries:
 
 ```
 
-You should now have the final output files:
-
-```
-
-data/output/
-glaciers.mbtiles
-glaciers.pmtiles
-
-```
-
-```
-
-```
+You should now have the final output file at `data/output/glaciers.pmtiles`
