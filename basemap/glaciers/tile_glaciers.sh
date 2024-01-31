@@ -9,15 +9,19 @@ ogr2ogr \
     data/temp/glaciers.gpkg \
     -progress
 
-echo -e "\nTiling dataset...\n"
-# tile glacier text lines 
-# tippecanoe -Z1 -z16 -P -o data/temp/glacier_labels.pmtiles --drop-densest-as-needed -l glacier-labels data/temp/glacier-labels.geojson --force
+ogr2ogr \
+    -f GeoJSONSeq \
+    data/temp/glaciers-labels.geojsons \
+    data/temp/glaciers-labels.gpkg \
+    -progress
 
-# tile glacier polygons 
+
+echo -e "\nTiling dataset...\n"
+
 tippecanoe \
     -Z1 \
     -z16 \
-    -o data/output/glaciers.pmtiles \
+    -o data/temp/glaciers.pmtiles \
     -l glaciers \
     --drop-densest-as-needed \
     --read-parallel \
@@ -25,9 +29,22 @@ tippecanoe \
     -P \
     --force
 
-# echo -e "\nCombining glacier polygons and text labels...\n"
+tippecanoe \
+    -Z1 \
+    -z16 \
+    -o data/temp/glaciers-labels.pmtiles \
+    -l glacier-labels \
+    --drop-densest-as-needed \
+    --read-parallel \
+    data/temp/glaciers-labels.geojsons \
+    -P \
+    --force
 
-# tile-join -o data/output/glaciers.pmtiles data/temp/glacier_labels.pmtiles data/temp/glaciers_outlines.pmtiles --force
+echo -e "\nCombining glacier polygons and text labels...\n"
 
+tile-join \
+    -o data/output/glaciers.pmtiles \
+    data/temp/glaciers-labels.pmtiles \
+    data/temp/glaciers.pmtiles --force
 
 echo -e "\n\nDone, created: \ndata/output/glaciers.pmtiles\n"
