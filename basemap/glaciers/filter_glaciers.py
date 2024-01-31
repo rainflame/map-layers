@@ -80,19 +80,6 @@ def cli(bbox, filter_names, filter_year, input_file, output_file):
             if "area" in feature["properties"]:
                 new_feat["properties"]["area"] = feature["properties"]["area"]
 
-            geom = feature["geometry"]["coordinates"]
-            poly = MultiPolygon([geom])
-
-            # make sure the polygon is valid
-            if not poly.is_valid:
-                poly = poly.buffer(0)
-                if not poly.is_valid:
-                    continue
-                else:
-                    new_feat["geometry"] = json.loads(to_geojson(poly))
-            else:
-                new_feat["geometry"] = json.loads(to_geojson(poly))
-
             # split any multi-polygons into individual polygons
             if new_feat["geometry"]["type"] == "MultiPolygon":
                 for poly in new_feat["geometry"]["coordinates"]:
@@ -104,6 +91,8 @@ def cli(bbox, filter_names, filter_year, input_file, output_file):
                         "properties": new_feat["properties"],
                     }
                     filtered.append(split_feat)
+            else:
+                filtered.append(new_feat)
 
         print(f"Saving {len(filtered)} glaciers...")
         # write the filtered features to the output file
