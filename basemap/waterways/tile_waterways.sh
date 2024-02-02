@@ -42,7 +42,8 @@ echo "Combining layers..."
 tile-join -o data/output/water.pmtiles \
           data/temp/waterways.pmtiles \
           data/temp/water.pmtiles \
-          data/temp/water-labels.pmtiles
+          data/temp/water-labels.pmtiles  \
+          --force
 
 
 echo -e "\n\nDone, created: \ndata/output/water.pmtiles"
