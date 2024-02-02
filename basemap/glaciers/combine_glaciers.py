@@ -67,7 +67,7 @@ def cli(
                     neighbor["properties"]["glac_name"] == p["properties"]["glac_name"]
                     and neighbor_poly.intersects(buffered_poly)
                 ) or (
-                    neighbor["properties"]["glac_name"] == "None"
+                    neighbor["properties"]["glac_name"] == None
                     and neighbor_poly.intersects(buffered_poly)
                 ):
                     combined_poly = poly.union(neighbor_poly)

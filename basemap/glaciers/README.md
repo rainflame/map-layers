@@ -24,7 +24,7 @@ python filter_glaciers.py \
     --output-file="data/temp/glaciers-filtered.gpkg" \
     --bbox="-123.417224,43.022586,-118.980589,45.278084" \
     --filter-year=2023 \
-    --filter-names="OR,unknown,NONE"
+    --filter-names="OR,unknown,NONE,None"
 ```
 
 ## Combine glaciers
@@ -41,7 +41,7 @@ python combine_glaciers.py \
 
 To place labels over glaciers, we've built a tool called [geopolymid](https://github.com/rainflame/geopolymid). This tool will create smoothed lines that flow through the centers of each polygon and can be used to place a label.
 
-See [geopolymid](https://github.com/rainflame/geopolymid) for instructions on how to create label lines.
+See [geopolymid](https://github.com/rainflame/geopolymid) for instructions on how to create label lines. For most glacier regions I've found `--spline-distance-threshold=100` works well.
 
 Once complete, name the labels as `glacier-labels.gpkg` and place in `data/temp/glacier-labels.gpkg`.
 
