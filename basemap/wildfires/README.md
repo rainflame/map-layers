@@ -27,7 +27,8 @@ Manually download shapefiles from the above links and place them in a `/data/sou
 To combine the three datasets into a single file for a given bounding box region, run:
 
 ```
-python combine_fire_datasets.py --bbox="-122.04976264563147,43.51921441989123,-120.94591116755655,44.39466349563759"
+python combine_fire_datasets.py \
+    --bbox="-123.417224,43.022586,-118.980589,45.278084"
 ```
 
 ## Deduplicate
@@ -45,6 +46,39 @@ Run the deduplication:
 ```
 python deduplicate_fires.py
 ```
+
+This deduplication process isn't perfect, so you may need to manually filter out some of the fire polygons based on their `fid`.
+
+```
+ogr2ogr \
+    -f GPKG \
+    data/temp/wildfires-temp.gpkg \
+    data/temp/wildfires-dedupped.gpkg \
+    -sql "SELECT * FROM \"wildfires-dedupped\" WHERE FID NOT IN (32, 124)" \
+    -nln wildfires
+
+```
+
+## Filter out old fires
+
+These datasets contain fire boundaries from as far back as 1900. You may want to filter to only the more recent fires:
+
+```
+ogr2ogr \
+    -f GPKG \
+    data/temp/wildfires-filtered.gpkg \
+    data/temp/wildfires-temp.gpkg \
+    -sql "SELECT * FROM wildfires WHERE year >= 1990" \
+    -nln wildfires
+```
+
+## Create label lines
+
+To place labels over wildfires, we've built a tool called [geopolymid](https://github.com/rainflame/geopolymid). This tool will create smoothed lines that flow through the centers of each polygon and can be used to place a label.
+
+See [geopolymid](https://github.com/rainflame/geopolymid) for instructions on how to create label lines.
+
+Once complete, name the labels as `wildfires-labels.gpkg` and place in `data/temp/wildfires-labels.gpkg`.
 
 ## Tile
 
