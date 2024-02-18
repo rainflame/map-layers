@@ -6,14 +6,14 @@ if [ -z "$1" ] || [ -z "$2" ]; then
     exit 1
 fi
 
-echo -e "\nConverting to GeoJSON...\n"
+echo "SNOW PIPELINE/TILING: Converting to GeoJSON..."
 
 ogr2ogr \
     -f GeoJSONSeq \
     data/temp/snow-contours.geojsons \
    "$1"
 
-echo -e "\nTiling dataset...\n"
+echo "SNOW PIPELINE/TILING: Creating tiles..."
 
 tippecanoe -Z1 -z16 -P \
          --drop-densest-as-needed \
@@ -21,4 +21,4 @@ tippecanoe -Z1 -z16 -P \
          -o "$2" \
           --force
 
-echo -e "\n\nDone, created: \n$2\n"
+echo "SNOW PIPELINE/TILING: Done, created $2"
