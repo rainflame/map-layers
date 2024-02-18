@@ -37,7 +37,7 @@ ogr2ogr \
 
 echo "SNOW PIPELINE: Tiling..."
 
-./tile_snow.sh \
+bash tile_snow.sh \
     data/temp/snow-final.gpkg \
     data/output/snow.pmtiles
 

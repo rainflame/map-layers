@@ -41,7 +41,7 @@ When complete you should have the latest snowcover data at `data/sources/snow-co
 To run all steps of the build pipeline with defaults:
 
 ```
-./pipeline.sh <bbox>
+./pipeline_snow.sh <bbox>
 ```
 
 ## Run the pipeline steps manually
