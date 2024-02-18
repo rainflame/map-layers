@@ -96,9 +96,21 @@ data/output/
     elevation.pmtiles
 ```
 
-## Build the contour tiles
+# Contours
 
 Contours are created by iterating over the DEM source files and running `gdal_contour` to create 40ft contours for the file region as geojson. Then, we use `tippecanoe` to combine the geojson contours into tiles.
+
+## Run the full contour pipeline
+
+Once you've downloaded DEMS, run all steps of the build pipeline:
+
+```
+./pipeline_contours.sh
+```
+
+## Run the pipeline steps manually
+
+For greater control over each step of the process the pipeline can be run one command at a time.
 
 ### Create contours
 
@@ -116,24 +128,27 @@ ogr2ogr \
     -f "GPKG" \
     -sql "SELECT * FROM \"elevation\" WHERE elevation % 1000 != 0" \
     "data/temp/contour_200_filtered.gpkg" \
-    "data/temp/contour_200.gpkg" \
+    "data/temp/contour_200.gpkg"
 
 ogr2ogr \
     -f "GPKG" \
     -sql "SELECT * FROM \"elevation\" WHERE elevation % 1000 != 0" \
     "data/temp/contour_40_filtered.gpkg" \
-    "data/temp/contour_40.gpkg" \
+    "data/temp/contour_40.gpkg"
 ```
 
 ### Tile contours and clean up
 
-Next, we tile the contours and define zoom ranges at which different contour intervals should be shown. 1000 ft contours are shown from z10-z18, 200 ft contours are shown from z11-z18, and 40 ft contours are shown from z12-z18.
+Next, we tile the contours and define zoom ranges at which different contour intervals should be shown. 1000 ft contours are shown from z10-z18, 200 ft contours are shown from z11-z18, and 40 ft contours are shown from z12-z18. Pass in each contour file followed by its layer name into the tiling script:
 
 ```
 ./tile_contours.sh \
     data/temp/contour_40_filtered.gpkg \
+    contour_40_landcover \
     data/temp/contour_200_filtered.gpkg \
+    contour_200_landcover \
     data/temp/contour_1000.gpkg \
+    contour_1000_landcover \
     data/output/contours.pmtiles
 ```
 
@@ -142,72 +157,4 @@ You should now have the final output files:
 ```
 data/output/
     contours.pmtiles
-```
-
-## Rendering
-
-### Hillshade
-
-To load the TerrainRGB elevation data in Maplibre-gl as hillshade, you can load it as a new layer:
-
-```json
-{
-  "type": "raster-dem",
-  "url": "pmtiles://http://localhost:8080/elevation.pmtiles",
-  "tileSize": 512
-}
-```
-
-and render it with a style spec like this:
-
-```json
-{
-  "id": "hillshade",
-  "type": "hillshade",
-  "source": "elevation",
-  "paint": {
-    "hillshade-exaggeration": 0.5,
-    "hillshade-shadow-color": "#5a5a5a",
-    "hillshade-highlight-color": "#FFFFFF",
-    "hillshade-accent-color": "#5a5a5a",
-    "hillshade-illumination-direction": 335,
-    "hillshade-illumination-anchor": "viewport",
-}
-```
-
-### Contours
-
-Contours are split into different three different layers: `contours_1000`, `contours_200`, and `contours_40`. They can be loaded like this:
-
-```json
-{
-  "type": "vector",
-  "url": "pmtiles://http://localhost:8080/contours.pmtiles"
-}
-```
-
-and rendered with a style spec like this, using 200 ft contours as an example:
-
-```json
-{
-  "id": "contour_200ft",
-  "type": "line",
-  "source": "contours",
-  "source-layer": "contour_200",
-  "layout": {
-    "line-join": "round",
-    "line-cap": "round"
-  },
-  "paint": {
-    "line-color": "#FF0000",
-    "line-width": {
-      "base": 1,
-      "stops": [
-        [10, 0.5],
-        [20, 2]
-      ]
-    },
-    "line-opacity": 0.8
-  }
-}
 ```

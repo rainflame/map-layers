@@ -2,14 +2,13 @@
 
 echo -e "\nTiling dataset...\n"
 
-# assuming $1 is 40 ft contours, $2 is 200 ft contours, $3 is 1000 ft contours and $4 is the output file
-if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ]; then
-    echo "Usage: $0 <40ft_contours> <200ft_contours> <1000ft_contours> <output file>"
+if [ -z "$1" ] || [ -z "$2" ] || [ -z "$3" ] || [ -z "$4" ] || [ -z "$5" ] || [ -z "$6" ] || [ -z "$7" ]; then
+    echo -e "Usage: $0 <40ft_contours> <40ft_contour_label> <200ft_contours> <200ft_contour_label> <1000ft_contours> <1000ft_contour_label> <output file>"
     exit 1
 fi
 
 # convert each input file to geojsonseq
-echo -e "\nConverting to geojsonseq...\n"
+echo "CONTOUR PIPELINE/TILING: Converting to geojsonseq..."
 ogr2ogr \
     -f GeoJSONSeq \
     data/temp/contour_40.geojsons \
@@ -19,22 +18,23 @@ ogr2ogr \
 ogr2ogr \
     -f GeoJSONSeq \
     data/temp/contour_200.geojsons \
-    "$2" \
+    "$3" \
     -progress
 
 ogr2ogr \
     -f GeoJSONSeq \
     data/temp/contour_1000.geojsons \
-    "$3" \
+    "$5" \
     -progress
 
 
+echo "CONTOUR PIPELINE/TILING: Creating tiles..."
 # tile contours, creating three separate files with 40ft, 200ft, and 1000ft contours at different zoom levels
 tippecanoe \
     -Z12 \
     -z16 \
     -y elevation \
-    -l contour_40 \
+    -l "${2}" \
     data/temp/contour_40.geojsons \
     --read-parallel \
     --drop-densest-as-needed \
@@ -49,7 +49,7 @@ tippecanoe \
     -Z11 \
     -z16 \
     -y elevation \
-    -l contour_200 \
+    -l "${4}" \
     data/temp/contour_200.geojsons \
     --read-parallel \
     --drop-densest-as-needed \
@@ -64,7 +64,7 @@ tippecanoe \
     -Z10 \
     -z16 \
     -y elevation \
-    -l contour_1000 \
+    -l "${6}" \
     data/temp/contour_1000.geojsons \
     --read-parallel \
     --drop-densest-as-needed \
@@ -75,12 +75,11 @@ tippecanoe \
     -P \
     --force
 
-echo -e "\nMerging layers...\n"
-
+echo "CONTOUR PIPELINE/TILING: Joining tiles..."
 tile-join \
-    -o "$4" \
+    -o "$7" \
     data/temp/contour_1000.pmtiles \
     data/temp/contour_200.pmtiles \
     data/temp/contour_40.pmtiles --force
 
-echo -e "\n\nDone, created:\n$4\n"
+echo "CONTOUR PIPELINE/TILING: Done, created $7"
