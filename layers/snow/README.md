@@ -2,6 +2,8 @@
 
 This layer represents an estimate of the current snow depth. Data is sourced from [SNODAS](https://nsidc.org/data/g02158/versions/1), a dataset for the continental United States that's updated daily.
 
+For Pika Maps, we have a cronjob that runs this build pipeline once a day and integrates the new snow layer into the basemap.
+
 ## Install
 
 Ensure you've [activated the conda environment](../../README.md#building-datasets).
@@ -44,7 +46,7 @@ To run all steps of the build pipeline with defaults:
 
 ## Run the pipeline steps manually
 
-For greater control over each step of the process, the pipeline can be run one command at a time.
+For greater control over each step of the process the pipeline can be run one command at a time.
 
 ### Quantize
 
@@ -56,6 +58,8 @@ We can also provide a bounding box with `--bbox` to crop the dataset to a smalle
 
 ```
 python quantize.py \
+    --input-file="data/sources/snow-conus.tif" \
+    --output-file="data/temp/snow-quantized.tif" \
     --bin-size=12 \
     --bbox="-123.417224,43.022586,-118.980589,45.278084"
 ```
