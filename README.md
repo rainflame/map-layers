@@ -1,12 +1,12 @@
 # Pika datasets
 
-The source code to generate the map layers available on [pikamaps.com](https://pikamaps.com).
+This is the source code used to generate the map tiles for [Pika Maps](https://pikamaps.com). We're releasing it publicly so anyone can see how the raw data sources are processed into a form that's more visually compelling. You should be able to run any of the pipelines in this repository and get data that's potentially useful for projects beyond just Pika Maps. However this is primarily an internal resource; it's provided as-is and we won't provide support for any additional features or use cases that aren't required by Pika Maps.
 
-There's two primary components to Pika Maps: the basemap, and the dynamic layers. The basemap is built from a variety of public datasets provided by U.S. federal agencies and openstreetmap. It's built once and updated fairly infrequently. You can build the basemap from scratch by building the components listed in [basemap/](/basemap/), then combining them into a single [protomaps](https://protomaps.com/) `pmtiles` archive. This archive can then be rendered using [maplibre-gl](https://github.com/maplibre/maplibre-gl-js) or any other map rendering engine that supports `pmtiles` archives.
+## Map layers
 
-The dynamic layers are updated more often, at least daily depending on the layer. Their structure mirrors that of the basemap, the only difference is that once built each layer is kept as its own `pmtiles` archive and served individually. You can find the code to build these layers in [layers/](/layers/). We run the pipelines to build these layers as cronjobs.
+The build pipelines we've developed are fundamentally different than an integrated tool like [planetiler](https://github.com/onthegomap/planetiler) that's designed for building vector tiles from OSM data for very large regions. Instead, we've designed the processing for each layer around a specific data source for much smaller regions. Sources include public datasets provided by U.S. federal and state agencies and OpenStreetMap.
 
-## Building
+Each pipeline contains a number of layer-specifc build steps that progressively transform that data for that layer using python and bash scripts. The pipelines utilize a variety of GIS tools including [GDAL](https://gdal.org/), [fiona](https://pypi.org/project/fiona/), [shapely](https://shapely.readthedocs.io/en/stable/), in addition to some custom tools we built like [geopolygonize](https://github.com/rainflame/geopolygonize/) and [geopolymid](https://github.com/rainflame/geopolymid). Once processing is complete, each build pipeline produces a geopackage file. We then use [tippecanoe](https://github.com/felt/tippecanoe) to tile the data into a [protomaps](https://protomaps.com/) `pmtiles` archive.
 
 To run any of the layer build pipelines, first make sure you have [conda or mamba installed](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html).
 
@@ -16,44 +16,17 @@ Create the environment:
 mamba env create -f environment.yml
 ```
 
-Activate the environment:
+Activate it:
+
 ```
 mamba activate pika-datasets
 ```
 
-Then follow the instructions below to build any components of the basemap or dynamic layers:
+Then follow the instructions below to build the layers:
 
-- Basemap
-  - [Elevation](/basemap/elevation/) (hillshading + contours)
-  - [Glaciers](/basemap/glaciers/) (highest-resolution glacier polygons)
-  - [Waterways](/basemap/waterways/) (lakes, rivers, canals, streams and so on)
-  - [Wildfires](/basemap/wildfires/) (historic wildfire perimeters)
-  - [Landcover](/basemap/landcover/) (polygons for 1000+ landcover classes)
-- Layers
-  - [Snow](/layers/snow/) (daily snowpack depth polygons)
-
-### Combining basemap layers
-
-Once you've created the layers you want to include in the basemap, you're ready to combine them into a single pmtiles file.
-
-First, create the output directory:
-
-```
-mkdir -p data/output/
-```
-
-To combine all layers you've generated, run:
-
-```
-./tile_layers.sh
-```
-
-This will search for any built layers and create `data/output/basemap.pmtiles`.
-
-Alternatively, you can manually add one or two layers to an existing basemap. For example, to add the glaciers layer to an existing basemap file, run:
-
-```
-tile-join -o data/output/basemap.pmtiles basemap/glaciers/data/output/glaciers.pmtiles data/output/basemap.pmtiles --force
-```
-
-Any of the vector layers you've generated in the basemap directory can be combined together. The only exception is `basemap/elevation/data/output/elevation.pmtiles` that is raster data and therefore must be loaded in Maplibre-gl as its own layer.
+- [Elevation](/layers/elevation/) (hillshading + contours)
+- [Glaciers](/layers/glaciers/) (highest-resolution glacier polygons)
+- [Waterways](/layers/waterways/) (lakes, rivers, canals, streams and so on)
+- [Wildfires](/layers/wildfires/) (historic wildfire perimeters)
+- [Landcover](/layers/landcover/) (polygons for 1000+ landcover classes)
+- [Snow](/layers/snow/) (daily snowpack depth polygons)
