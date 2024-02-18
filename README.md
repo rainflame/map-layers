@@ -30,3 +30,5 @@ Then follow the instructions below to build the layers:
 - [Wildfires](/layers/wildfires/) (historic wildfire perimeters)
 - [Landcover](/layers/landcover/) (polygons for 1000+ landcover classes)
 - [Snow](/layers/snow/) (daily snowpack depth polygons)
+- [Peaks](/layers/peaks/) (prominent points)
+- [Trails](/layers/trails/) (hiking, snowshoeing, and cross country skiing trails)
