@@ -53,3 +53,7 @@ python parse_places.py
 Now you should have place point and polygons at `data/temp/place-points.gpkg` and `data/temp/place-polygons.gpkg`.
 
 ## Tile
+
+```
+./tile_places.sh
+```
