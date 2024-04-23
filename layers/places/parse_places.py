@@ -13,7 +13,9 @@ wkbfab = osmium.geom.WKBFactory()
 class OSMPlaceHandler(osmium.SimpleHandler):
     def __init__(self):
         super(OSMPlaceHandler, self).__init__()
-        self.points = []
+        self.points_prominence_1 = []
+        self.points_prominence_2 = []
+        self.points_prominence_3 = []
         self.polys = []
 
     def is_reservation(self, w):
@@ -43,18 +45,46 @@ class OSMPlaceHandler(osmium.SimpleHandler):
             "neighbourhood",
         ]
 
+    def is_place_prominence1(self, w):
+        return "place" in w.tags and w.tags["place"] in [
+            "city",
+        ]
+
+    def is_place_prominence2(self, w):
+        return "place" in w.tags and w.tags["place"] in [
+            "town",
+            "village",
+        ]
+
+    def is_place_prominence3(self, w):
+        return "place" in w.tags and w.tags["place"] in [
+            "hamlet",
+            "suburb",
+            "locality",
+            "island",
+            "islet",
+            "farm",
+            "isolated_dwelling",
+            "neighbourhood",
+        ]
+
     def node(self, n):
         if self.is_place(n):
-            self.points.append(
-                (
-                    Point(n.location.lon, n.location.lat),
-                    {
-                        "id": n.id,
-                        "name": n.tags["name"] if "name" in n.tags else None,
-                        "type": n.tags["place"],
-                    },
-                )
+            point_data = (
+                Point(n.location.lon, n.location.lat),
+                {
+                    "id": n.id,
+                    "name": n.tags["name"] if "name" in n.tags else None,
+                    "type": n.tags["place"],
+                },
             )
+
+            if self.is_place_prominence1(n):
+                self.points_prominence_1.append(point_data)
+            elif self.is_place_prominence2(n):
+                self.points_prominence_2.append(point_data)
+            elif self.is_place_prominence3(n):
+                self.points_prominence_3.append(point_data)
 
     def area(self, a):
         if self.is_reservation(a) or self.is_area(a):
@@ -209,20 +239,28 @@ def cli(input_file, blm_input_file, polygon_output_file, point_output_file):
             "type": "str",
         },
     }
-    with fiona.open(
-        point_output_file, "w", driver="GPKG", crs="EPSG:4326", schema=schema
-    ) as output:
-        for point in osm_handler.points:
-            output.write(
-                {
-                    "geometry": mapping(point[0]),
-                    "properties": {
-                        "id": point[1]["id"],
-                        "name": point[1]["name"],
-                        "type": point[1]["type"],
-                    },
-                }
-            )
+
+    for point_list, prominence in [
+        (osm_handler.points_prominence_1, 1),
+        (osm_handler.points_prominence_2, 2),
+        (osm_handler.points_prominence_3, 3),
+    ]:
+        print(f"Saving places with prominence {prominence}...")
+        file = point_output_file.replace(".gpkg", f"-prominence-{prominence}.gpkg")
+        with fiona.open(
+            file, "w", driver="GPKG", crs="EPSG:4326", schema=schema
+        ) as output:
+            for point in point_list:
+                output.write(
+                    {
+                        "geometry": mapping(point[0]),
+                        "properties": {
+                            "id": point[1]["id"],
+                            "name": point[1]["name"],
+                            "type": point[1]["type"],
+                        },
+                    }
+                )
 
 
 if __name__ == "__main__":
