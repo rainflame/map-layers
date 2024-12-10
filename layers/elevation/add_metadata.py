@@ -11,9 +11,9 @@ import click
     default="data/output/elevation.mbtiles",
     help="Path to the mbtiles file",
 )
-def cli(mbtiles_file):
+def cli(input_file):
     # Run gdalinfo to get corner coordinates
-    gdalinfo_output = subprocess.check_output(["gdalinfo", mbtiles_file]).decode()
+    gdalinfo_output = subprocess.check_output(["gdalinfo", input_file]).decode()
 
     pattern = re.compile(r"\((.*?)\)")
     matches = [
@@ -44,7 +44,7 @@ def cli(mbtiles_file):
     print("adding bounds {}".format(bounds))
 
     # Open the database
-    connection = sqlite3.connect(mbtiles_file)
+    connection = sqlite3.connect(input_file)
     cursor = connection.cursor()
 
     # Check if the 'bounds' metadata already exists
