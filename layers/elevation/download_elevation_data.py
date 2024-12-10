@@ -8,6 +8,7 @@ import multiprocessing
 # using the 1 arc-second dataset, but could use 1/3 arc-second for higher resolution
 dataset = "National Elevation Dataset (NED) 1 arc-second"
 
+
 # use urllib3 to download a url
 def request(method, url):
     try:
@@ -34,13 +35,16 @@ def download(url):
 
 # click cli to get number of workers and bounding box
 @click.command()
-@click.option("--workers", default=multiprocessing.cpu_count(), help="Number of workers to use")
+@click.option(
+    "--workers", default=multiprocessing.cpu_count(), help="Number of workers to use"
+)
+@click.option("--dataset", default=dataset, help="Dataset to download data for")
 @click.option(
     "--bbox",
     default="-124.566244,46.864746,-116.463504,41.991794",
     help="Bounding box to download data for",
 )
-def cli(workers, bbox):
+def cli(workers, dataset, bbox):
     print("Getting region details from the National Map API...")
     # USGS national map api endpoint to list DEMs for our bounding box
     url = (
