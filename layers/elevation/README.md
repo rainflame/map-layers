@@ -75,7 +75,7 @@ python rgbify.py \
     --max-z=14 \
     --workers=10 \
     --input-dataset="data/temp/dem.vrt" \
-    --output-mbtiles="data/output/elevation.mbtiles
+    --output-mbtiles="data/output/elevation.mbtiles"
 ```
 
 > [!WARNING]
