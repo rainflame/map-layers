@@ -33,18 +33,14 @@ def download(url):
         print("Failed to save file", filename, e)
 
 
-# click cli to get number of workers and bounding box
 @click.command()
-@click.option(
-    "--workers", default=multiprocessing.cpu_count(), help="Number of workers to use"
-)
 @click.option("--dataset", default=dataset, help="Dataset to download data for")
 @click.option(
     "--bbox",
     default="-124.566244,46.864746,-116.463504,41.991794",
     help="Bounding box to download data for",
 )
-def cli(workers, dataset, bbox):
+def cli(dataset, bbox):
     print("Getting region details from the National Map API...")
     # USGS national map api endpoint to list DEMs for our bounding box
     url = (
@@ -100,14 +96,8 @@ def cli(workers, dataset, bbox):
 
     print("Downloading {} files...".format(len(filtered_urls)))
 
-    # download the data in parallel save each file to data/sources/
-    with multiprocessing.Pool(processes=workers) as pool:
-        for _ in tqdm.tqdm(
-            pool.imap_unordered(download, filtered_urls), total=len(filtered_urls)
-        ):
-            pass
-        pool.close()
-        pool.join()
+    for url in tqdm.tqdm(filtered_urls):
+        download(url)
 
 
 if __name__ == "__main__":
