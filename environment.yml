@@ -25,7 +25,8 @@ dependencies:
   - pip
   - pip:
       - rio-rgbify
+      - rio-mbtiles>=1.6.0
       - simplification
-      - geopolygonize
+      # - geopolygonize
       - osmium
       - git+https://github.com/mapbox/mbutil.git
