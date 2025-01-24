@@ -2,8 +2,6 @@
 
 This layer represents an estimate of the current snow depth. Data is sourced from [SNODAS](https://nsidc.org/data/g02158/versions/1), a dataset for the continental United States that's updated daily.
 
-For Pika Maps, we have a cronjob that runs this build pipeline once a day and integrates the new snow layer into the basemap.
-
 ## Install
 
 Ensure you've [activated the conda environment](../../README.md#building-datasets).

@@ -1,4 +1,4 @@
-name: pika-datasets
+name: map-layers
 channels:
   - conda-forge
   - defaults
