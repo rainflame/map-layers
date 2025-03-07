@@ -27,6 +27,12 @@ ogr2ogr \
     data/temp/place-points-prominence-3.gpkg \
     -progress
 
+ogr2ogr \
+    -f GeoJSONSeq \
+    data/temp/place-points-prominence-4.geojsons \
+    data/temp/place-points-prominence-4.gpkg \
+    -progress
+
 echo -e "\nTiling dataset...\n"
 
 tippecanoe \
@@ -79,6 +85,19 @@ tippecanoe \
     -P \
     --force
 
+tippecanoe \
+    -Z12 \
+    -z16 \
+    -r1 \
+    --no-feature-limit \
+    --no-tile-size-limit \
+    -o data/temp/place-points-prominence-4.pmtiles \
+    -l places_p4 \
+    --read-parallel \
+    data/temp/place-points-prominence-4.geojsons \
+    -P \
+    --force
+
 echo -e "\nCombining place points and polygons...\n"
 
 tile-join \
@@ -87,6 +106,7 @@ tile-join \
     data/temp/place-points-prominence-1.pmtiles \
     data/temp/place-points-prominence-2.pmtiles \
     data/temp/place-points-prominence-3.pmtiles \
+    data/temp/place-points-prominence-4.pmtiles \
     --force
 
 echo -e "\n\nDone, created: \ndata/output/places.pmtiles\n"

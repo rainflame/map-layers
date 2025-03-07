@@ -16,6 +16,7 @@ class OSMPlaceHandler(osmium.SimpleHandler):
         self.points_prominence_1 = []
         self.points_prominence_2 = []
         self.points_prominence_3 = []
+        self.points_prominence_4 = []
         self.polys = []
 
     def is_reservation(self, w):
@@ -44,22 +45,32 @@ class OSMPlaceHandler(osmium.SimpleHandler):
             "isolated_dwelling",
             "neighbourhood",
         ]
+        
+    # there's probably a smart way to assign prominence based on relative population density
+    # but for now we'll just hardcode population cutoffs 
 
     def is_place_prominence1(self, w):
         return "place" in w.tags and w.tags["place"] in [
             "city",
-        ]
+        ] or ("population" in w.tags and w.tags["population"].isdigit() and int(w.tags["population"]) > 100000)
 
     def is_place_prominence2(self, w):
         return "place" in w.tags and w.tags["place"] in [
             "town",
             "village",
-        ]
+            "suburb",
+        ] and ("population" in w.tags and w.tags["population"].isdigit() and int(w.tags["population"]) > 50000)
 
     def is_place_prominence3(self, w):
         return "place" in w.tags and w.tags["place"] in [
-            "hamlet",
+            "town",
+            "village",
             "suburb",
+        ] 
+
+    def is_place_prominence4(self, w):
+       return "place" in w.tags and w.tags["place"] in [
+            "hamlet",
             "locality",
             "island",
             "islet",
@@ -67,6 +78,7 @@ class OSMPlaceHandler(osmium.SimpleHandler):
             "isolated_dwelling",
             "neighbourhood",
         ]
+
 
     def node(self, n):
         if self.is_place(n):
@@ -85,6 +97,8 @@ class OSMPlaceHandler(osmium.SimpleHandler):
                 self.points_prominence_2.append(point_data)
             elif self.is_place_prominence3(n):
                 self.points_prominence_3.append(point_data)
+            elif self.is_place_prominence4(n):
+                self.points_prominence_4.append(point_data)
 
     def area(self, a):
         if self.is_reservation(a) or self.is_area(a):
@@ -244,6 +258,7 @@ def cli(input_file, blm_input_file, polygon_output_file, point_output_file):
         (osm_handler.points_prominence_1, 1),
         (osm_handler.points_prominence_2, 2),
         (osm_handler.points_prominence_3, 3),
+        (osm_handler.points_prominence_4, 4),
     ]:
         print(f"Saving places with prominence {prominence}...")
         file = point_output_file.replace(".gpkg", f"-prominence-{prominence}.gpkg")
